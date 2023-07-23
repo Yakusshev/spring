@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -26,11 +27,19 @@ fun MainMenuScreen(
     playClick: () -> Unit
 ) {
     val play = viewModel.getPlayState().collectAsState().value
+    val state = viewModel.getSnakeState().collectAsState().value
+
+
+    val configuration = LocalConfiguration.current
+
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
+
     BackHandler() {
         
     }
+    Game(state.x, state.y)
     Menu(play, viewModel::onPlayClicked)
-    Game(play)
 }
 
 @Composable
@@ -69,17 +78,16 @@ fun PlayButton(alpha: Float, playClick: () -> Unit) {
 }
 
 @Composable
-fun Game(play: Boolean) {
+fun Game(x: Int, y: Int) {
     BoxWithConstraints(
         Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-
         Box(
             modifier = Modifier
                 .size(maxWidth / 10)
-                .offset(x = maxWidth / 2, y = maxHeight / 2)
+                .offset(x = x.dp, y = y.dp)
                 .background(color = Color.Green)
         )
     }
