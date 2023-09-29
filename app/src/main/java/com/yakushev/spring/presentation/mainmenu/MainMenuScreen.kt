@@ -18,22 +18,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun MainMenuScreen(
-    viewModel: MainMenuViewModel = viewModel(),
+    viewModelFactory: ViewModelProvider.Factory,
+    viewModel: MainMenuViewModel = viewModel(factory = viewModelFactory),
     playClick: () -> Unit
 ) {
+    LocalConfiguration.current.run {
+        viewModel.onInitScreen(screenWidthDp, screenHeightDp)
+    }
+
     val play = viewModel.getPlayState().collectAsState().value
     val state = viewModel.getSnakeState().collectAsState().value
-
-
-    val configuration = LocalConfiguration.current
-
-    val screenHeight = configuration.screenHeightDp.dp
-    val screenWidth = configuration.screenWidthDp.dp
 
     BackHandler() {
         
@@ -48,7 +48,8 @@ fun Menu(play: Boolean, playClick: () -> Unit) {
     var startAnimate by remember { mutableStateOf(false) }
     val alphaAnimation = animateFloatAsState(
         targetValue = if (startAnimate) 1f else 0f,
-        animationSpec =  tween(durationMillis = 3000)
+        animationSpec =  tween(durationMillis = 3000),
+        label = ""
     )
     LaunchedEffect(key1 = true) {
         startAnimate = true

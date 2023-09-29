@@ -1,15 +1,13 @@
 package com.yakushev.spring.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import com.yakushev.spring.presentation.game.GameScreen
 import com.yakushev.spring.presentation.mainmenu.MainMenuScreen
-import com.yakushev.spring.presentation.mainmenu.MainMenuViewModel
-import com.yakushev.spring.utils.ScreenRoute
 
 sealed class Screens(val route: String) {
     object Splash : Screens(route = ScreenRoute.SPLASH)
@@ -18,7 +16,10 @@ sealed class Screens(val route: String) {
 }
 
 @Composable
-fun SetupNavHost(navController: NavHostController) {
+fun SetupNavHost(
+    navController: NavHostController,
+    viewModelFactory: ViewModelProvider.Factory
+) {
     NavHost(
         navController = navController,
         startDestination = Screens.MainMenu.route
@@ -31,6 +32,7 @@ fun SetupNavHost(navController: NavHostController) {
         }
         composable(route = Screens.MainMenu.route) {
             MainMenuScreen(
+                viewModelFactory = viewModelFactory,
                 playClick = { navController.navigate(Screens.Game.route) }
             )
         }

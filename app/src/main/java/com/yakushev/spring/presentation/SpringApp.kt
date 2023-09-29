@@ -1,4 +1,4 @@
-package com.yakushev.spring.core
+package com.yakushev.spring.presentation
 
 import android.app.Application
 import android.content.Context
@@ -12,10 +12,12 @@ class SpringApp : Application() {
         super.onCreate()
         appComponent = DaggerAppComponent.create()
     }
+
+    fun getAppComponent(): AppComponent = appComponent
 }
 
 val Context.appComponent: AppComponent
     get() = when (this) {
-        is SpringApp -> appComponent
+        is SpringApp -> this.getAppComponent()
         else -> applicationContext.appComponent
     }

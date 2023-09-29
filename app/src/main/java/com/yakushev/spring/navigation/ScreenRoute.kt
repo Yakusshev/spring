@@ -1,4 +1,4 @@
-package com.yakushev.spring.utils
+package com.yakushev.spring.navigation
 
 object ScreenRoute {
     const val SPLASH = "splash_screen"
