@@ -31,7 +31,6 @@ class MainActivity : ComponentActivity() {
                     viewModelFactory = viewModelFactory,
                     exitClick = ::finishAffinity
                 )
-                navController.navigate(Route.MAIN_MENU)
             }
         }
     }
