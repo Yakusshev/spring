@@ -10,9 +10,9 @@ import com.yakushev.spring.presentation.game.GameScreen
 import com.yakushev.spring.presentation.mainmenu.MainMenuScreen
 
 sealed class Screens(val route: String) {
-    object Splash : Screens(route = ScreenRoute.SPLASH)
-    object MainMenu : Screens(route = ScreenRoute.MAIN_MENU)
-    object Game : Screens(route = ScreenRoute.GAME)
+    object Splash : Screens(route = Route.SPLASH)
+    object MainMenu : Screens(route = Route.MAIN_MENU)
+    object Game : Screens(route = Route.GAME)
 }
 
 @Composable
@@ -22,20 +22,19 @@ fun SetupNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screens.MainMenu.route
+        startDestination = Screens.Game.route
     ) {
         composable(route = Screens.Splash.route) {
 
         }
         dialog(route = Screens.MainMenu.route) {
-
-        }
-        composable(route = Screens.MainMenu.route) {
             MainMenuScreen(
                 viewModelFactory = viewModelFactory,
                 playClick = { navController.navigate(Screens.Game.route) }
             )
         }
+//        composable(route = Screens.MainMenu.route) {
+//        }
 
         composable(route = Screens.Game.route) {
             GameScreen()

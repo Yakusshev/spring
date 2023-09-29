@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.yakushev.spring.presentation.mainmenu.MainMenuViewModel.SnakeUiState
 import kotlinx.coroutines.delay
 
 @Composable
@@ -35,11 +36,27 @@ fun MainMenuScreen(
     val play = viewModel.getPlayState().collectAsState().value
     val state = viewModel.getSnakeState().collectAsState().value
 
-    BackHandler() {
+    BackHandler {
         
     }
-    Game(state.x, state.y)
+    Game(state)
     Menu(play, viewModel::onPlayClicked)
+}
+
+@Composable
+fun Game(state: SnakeUiState) {
+    BoxWithConstraints(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(maxWidth / 10)
+                .offset(x = state.x.dp, y = state.y.dp)
+                .background(color = Color.Green)
+        )
+    }
 }
 
 @Composable
@@ -78,21 +95,6 @@ fun PlayButton(alpha: Float, playClick: () -> Unit) {
     }
 }
 
-@Composable
-fun Game(x: Int, y: Int) {
-    BoxWithConstraints(
-        Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(maxWidth / 10)
-                .offset(x = x.dp, y = y.dp)
-                .background(color = Color.Green)
-        )
-    }
-}
 
 @Preview
 @Composable

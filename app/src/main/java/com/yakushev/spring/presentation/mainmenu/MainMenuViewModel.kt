@@ -16,7 +16,7 @@ class MainMenuViewModel @Inject constructor(
     private val setScreenSizeUseCase: SetScreenSizeUseCase
 ) : ViewModel() {
     private val playState = MutableStateFlow(false)
-    private val snakeState = MutableStateFlow(SnakeUiState(10, 10))
+    private val snakeState = MutableStateFlow(SnakeUiState(0, 0, 0))
 
     init {
         gameLoop()
@@ -30,11 +30,11 @@ class MainMenuViewModel @Inject constructor(
     }
 
     internal fun onPlayClicked() {
-        viewModelScope.launch { playState.emit(true) }
+        viewModelScope.launch { playState.emit(value = true) }
     }
 
     internal fun onPauseClicked() {
-        viewModelScope.launch { playState.emit(false) }
+        viewModelScope.launch { playState.emit(value = false) }
     }
 
     private fun gameLoop() = viewModelScope.launch {
@@ -52,10 +52,9 @@ class MainMenuViewModel @Inject constructor(
         }
     }
 
-
-
     data class SnakeUiState(
         val x: Int,
-        val y: Int
+        val y: Int,
+        val size: Int
     )
 }

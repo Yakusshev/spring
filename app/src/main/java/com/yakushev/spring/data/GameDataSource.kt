@@ -1,5 +1,7 @@
 package com.yakushev.spring.data
 
+import com.yakushev.spring.domain.GameConstants.SNAKE_BODY_COEF
+
 class GameDataSource {
 
     private var fieldHeight = 0
@@ -8,9 +10,12 @@ class GameDataSource {
     private var snakeX = 0
     private var snakeY = 0
 
+    private var snakeBodySize = 0
+
     fun setFieldSize(width: Int, height: Int) {
         fieldWidth = width
         fieldHeight = height
+        snakeBodySize = fieldHeight / SNAKE_BODY_COEF
     }
 
     fun getFieldHeight(): Int = fieldHeight
