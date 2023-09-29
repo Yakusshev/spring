@@ -28,7 +28,8 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 SetupNavHost(
                     navController = navController,
-                    viewModelFactory = viewModelFactory
+                    viewModelFactory = viewModelFactory,
+                    exitClick = ::finishAffinity
                 )
                 navController.navigate(Route.MAIN_MENU)
             }

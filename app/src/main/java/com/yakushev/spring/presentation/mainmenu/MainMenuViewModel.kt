@@ -2,59 +2,23 @@ package com.yakushev.spring.presentation.mainmenu
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yakushev.spring.domain.GameConstants
-import com.yakushev.spring.domain.usecases.SetScreenSizeUseCase
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.yakushev.spring.domain.usecases.GetPlayStateUseCase
+import com.yakushev.spring.domain.usecases.SetPlayStateUseCase
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MainMenuViewModel @Inject constructor(
-    private val setScreenSizeUseCase: SetScreenSizeUseCase
+    private val setPlayStateUseCase: SetPlayStateUseCase,
+    private val getPlayStateUseCase: GetPlayStateUseCase
 ) : ViewModel() {
-    private val playState = MutableStateFlow(false)
-    private val snakeState = MutableStateFlow(SnakeUiState(0, 0, 0))
-
-    init {
-        gameLoop()
-    }
-
-    internal fun getPlayState(): StateFlow<Boolean> = playState.asStateFlow()
-    internal fun getSnakeState(): StateFlow<SnakeUiState> = snakeState.asStateFlow()
-
-    internal fun onInitScreen(width: Int, height: Int) {
-        setScreenSizeUseCase(width, height)
-    }
+    internal fun getPlayState(): StateFlow<Boolean> = getPlayStateUseCase()
 
     internal fun onPlayClicked() {
-        viewModelScope.launch { playState.emit(value = true) }
+        viewModelScope.launch { setPlayStateUseCase(play = true) }
     }
 
     internal fun onPauseClicked() {
-        viewModelScope.launch { playState.emit(value = false) }
+        viewModelScope.launch { setPlayStateUseCase(play = false) }
     }
-
-    private fun gameLoop() = viewModelScope.launch {
-        getPlayState().collect { playState ->
-            while (playState) {
-                delay(GameConstants.DELAY)
-                step()
-            }
-        }
-    }
-
-    private suspend fun step() {
-        snakeState.update { state ->
-            state.copy(x = state.x + 10)
-        }
-    }
-
-    data class SnakeUiState(
-        val x: Int,
-        val y: Int,
-        val size: Int
-    )
 }

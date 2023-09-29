@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.yakushev.spring.core.di.DaggerViewModelFactory
 import com.yakushev.spring.core.di.ViewModelKey
 import com.yakushev.spring.data.GameDataSource
+import com.yakushev.spring.presentation.game.GameViewModel
 import com.yakushev.spring.presentation.mainmenu.MainMenuViewModel
 import dagger.Binds
 import dagger.Module
@@ -19,8 +20,13 @@ interface AppModule {
 
     @Binds
     @IntoMap
+    @ViewModelKey(GameViewModel::class)
+    fun bindsGameViewModel(viewModel: GameViewModel): ViewModel
+
+    @Binds
+    @IntoMap
     @ViewModelKey(MainMenuViewModel::class)
-    fun bindsMainViewModel(viewModel: MainMenuViewModel): ViewModel
+    fun bindsMainMenuViewModel(viewModel: MainMenuViewModel): ViewModel
 
     companion object {
 

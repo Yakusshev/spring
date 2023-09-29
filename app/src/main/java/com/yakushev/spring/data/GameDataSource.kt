@@ -1,14 +1,19 @@
 package com.yakushev.spring.data
 
 import com.yakushev.spring.domain.GameConstants.SNAKE_BODY_COEF
+import com.yakushev.spring.domain.model.SnakeState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
 class GameDataSource {
 
+    private val playState: MutableStateFlow<Boolean> = MutableStateFlow(value = false)
+    private val firstLaunchState: MutableStateFlow<Boolean> = MutableStateFlow(value = true)
+    private val snakeState: MutableStateFlow<SnakeState> = MutableStateFlow(SnakeState.empty)
+
     private var fieldHeight = 0
     private var fieldWidth = 0
-
-    private var snakeX = 0
-    private var snakeY = 0
 
     private var snakeBodySize = 0
 
@@ -22,12 +27,15 @@ class GameDataSource {
 
     fun getFieldWidth(): Int = fieldWidth
 
-    fun setSnakePosition(x: Int = snakeX, y: Int = snakeY) {
-        snakeX = x
-        snakeY = y
+    suspend fun setPlay(play: Boolean) {
+        playState.emit(play)
     }
 
-    fun getSnakeX(): Int = snakeX
+    fun getPlayState(): StateFlow<Boolean> = playState
 
-    fun getSnakeY(): Int = snakeY
+    fun getSnakeState(): StateFlow<SnakeState> = snakeState
+
+    fun updateSnakeState(function: (state: SnakeState) -> SnakeState) {
+        snakeState.update { state -> function(state) }
+    }
 }
