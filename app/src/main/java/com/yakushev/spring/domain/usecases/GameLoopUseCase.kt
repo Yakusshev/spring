@@ -24,25 +24,25 @@ class GameLoopUseCase @Inject constructor(
 
     private fun SnakeState.right(): SnakeState {
         return copy(
-            x = if (x < dataSource.getFieldWidth()) x + SNAKE_SPEED else -size
+            x = if (x < dataSource.getFieldWidth()) x + SNAKE_SPEED else -width
         )
     }
 
     private fun SnakeState.left(): SnakeState {
         return copy(
-            x = if (x > 0 - size) x - SNAKE_SPEED else dataSource.getFieldWidth()
+            x = if (x > 0 - width) x - SNAKE_SPEED else dataSource.getFieldWidth()
         )
     }
 
     private fun SnakeState.up(): SnakeState {
         return copy(
-            y = if (y > 0 - size) y - SNAKE_SPEED else dataSource.getFieldHeight()
+            y = if (y > 0 - width) y - SNAKE_SPEED else dataSource.getFieldHeight()
         )
     }
 
     private fun SnakeState.down(): SnakeState {
         return copy(
-            y = if (y < dataSource.getFieldHeight()) y + SNAKE_SPEED else -size
+            y = if (y < dataSource.getFieldHeight()) y + SNAKE_SPEED else -width
         )
     }
 

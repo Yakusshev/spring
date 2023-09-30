@@ -22,7 +22,8 @@ class GameDataSource {
     fun setFieldSize(width: Int, height: Int) {
         fieldWidth = width
         fieldHeight = height
-        snakeState.update { snake -> snake.copy(size = fieldHeight / SNAKE_BODY_COEF) }
+        val refSize = if (fieldHeight > fieldWidth) fieldHeight else fieldWidth
+        snakeState.update { snake -> snake.copy(width = refSize / SNAKE_BODY_COEF) }
     }
 
     fun getFieldHeight(): Int = fieldHeight

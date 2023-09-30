@@ -1,6 +1,7 @@
 package com.yakushev.spring.presentation.game
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -11,8 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
@@ -26,9 +29,12 @@ fun GameScreen(
     viewModelFactory: ViewModelProvider.Factory,
     viewModel: GameViewModel = viewModel(factory = viewModelFactory)
 ) {
-    LocalConfiguration.current.run {
-        viewModel.onInitScreen(screenWidthDp, screenHeightDp)
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        viewModel.onInitScreen(size.width.toInt(), size.height.toInt())
     }
+//    LocalConfiguration.current.run {
+//        viewModel.onInitScreen(screenWidthDp * densityDpi, screenHeightDp * densityDpi)
+//    }
 
     Field(viewModel)
 
@@ -66,9 +72,35 @@ fun Field(viewModel: GameViewModel) {
 
 @Composable
 private fun Snake(snake: SnakeState) {
+    val snakeColor = MaterialTheme.colorScheme.primary
+
+    val points = snake.turnList.map { point ->
+        Offset(point.x.toFloat(), point.y.toFloat())
+    }.toMutableList().apply {
+        add(0, Offset(snake.x.toFloat(), snake.y.toFloat()))
+    }
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawRect(
+            color = snakeColor,
+            topLeft = Offset(snake.x.toFloat(), snake.y.toFloat()),
+            size = Size(snake.width.toFloat(), snake.width.toFloat())
+        )
+
+
+        drawPoints(
+            points = points,
+            pointMode = PointMode.Lines,
+            color = snakeColor,
+            strokeWidth = snake.width.toFloat()
+        )
+    }
+}
+
+@Composable
+private fun SnakeOld(snake: SnakeState) {
     Box(
         modifier = Modifier
-            .size(snake.size.dp)
+            .size(snake.width.dp)
             .offset(x = snake.x.dp, y = snake.y.dp)
             .background(color = MaterialTheme.colorScheme.primary)
     )
