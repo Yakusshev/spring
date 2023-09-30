@@ -5,9 +5,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -25,17 +25,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.yakushev.spring.domain.model.Direction
 import com.yakushev.spring.domain.model.SnakeState
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 
 @Composable
 fun GameScreen(
@@ -45,6 +45,7 @@ fun GameScreen(
     LocalConfiguration.current.run {
         viewModel.onInitScreen(screenWidthDp, screenHeightDp)
     }
+    //tk47n5tmer6r952
 
     Field(viewModel)
 
@@ -56,76 +57,35 @@ fun GameScreen(
 @Composable
 fun Field(viewModel: GameViewModel) {
     val snakeState = viewModel.getSnakeState().collectAsState().value
-    BoxWithConstraints(
+    Box(
         Modifier
             .fillMaxSize()
             .background(Color.Black)
+            .pointerInput(Unit) {
+                detectDragGestures { _, dragAmount ->
+                    val (x, y) = dragAmount
+                    val threshold = 5
+                    if (abs(x) < threshold && abs(y) < threshold) return@detectDragGestures
+                    if (abs(x) > abs(y)) {
+                        if (x > 0) viewModel.onDirectionChanged(Direction.RIGHT)
+                        else viewModel.onDirectionChanged(Direction.LEFT)
+                    } else {
+                        if (y > 0) viewModel.onDirectionChanged(Direction.DOWN)
+                        else viewModel.onDirectionChanged(Direction.UP)
+                    }
+                }
+            }
     ) {
         Snake(snakeState)
-        Buttons(viewModel)
     }
 }
 
-@Composable
-private fun BoxWithConstraintsScope.Buttons(viewModel: GameViewModel) {
-    ConstraintLayout(
-        modifier = Modifier.align(Alignment.BottomCenter)
-    ) {
-        val (up, down, right, left) = createRefs()
-
-        val margin = 64.dp
-
-        Box(
-            Modifier
-                .constrainAs(down) {
-                    bottom.linkTo(parent.bottom, margin)
-                    end.linkTo(parent.end)
-                }
-                .directionButtonModifier(viewModel, Direction.DOWN)
-        )
-        Box(
-            Modifier
-                .constrainAs(up) {
-                    bottom.linkTo(down.top, margin)
-                    end.linkTo(parent.end)
-                }
-                .directionButtonModifier(viewModel, Direction.UP)
-        )
-        Box(
-            Modifier
-                .constrainAs(right) {
-                    bottom.linkTo(down.top)
-                    start.linkTo(left.end, margin)
-                }
-                .directionButtonModifier(viewModel, Direction.RIGHT)
-        )
-        Box(
-            modifier = Modifier
-                .constrainAs(left) {
-                    bottom.linkTo(down.top)
-                    end.linkTo(down.start)
-                }
-                .directionButtonModifier(viewModel, Direction.LEFT)
-        )
-    }
-}
-
-fun Modifier.directionButtonModifier(
-    viewModel: GameViewModel,
-    direction: Direction
-): Modifier = this
-    .rotate(degrees = 45f)
-    .size(64.dp)
-    .alpha(0.25f)
-    .background(color = Color.Red)
-    .clickable { viewModel.onDirectionButtonClicked(direction) }
 
 @Composable
 private fun Snake(snake: SnakeState) {
     Box(
         modifier = Modifier
             .size(snake.size.dp)
-//            .offset { IntOffset(x = state.x, y = state.y) }
             .offset(x = snake.x.dp, y = snake.y.dp)
             .background(color = Color.Green)
     )
@@ -172,4 +132,5 @@ fun PlayButton(alpha: Float, playClick: () -> Unit) {
 @Composable
 fun PreviewMainMenuScreen() {
     PlayButton(1f, {})
+
 }

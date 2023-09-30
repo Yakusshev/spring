@@ -47,7 +47,7 @@ class GameViewModel @Inject constructor(
         viewModelScope.launch { setPlayStateUseCase(play = false) }
     }
 
-    internal fun onDirectionButtonClicked(direction: Direction) {
+    internal fun onDirectionChanged(direction: Direction) {
         setDirectionUseCase(direction = direction)
     }
 
