@@ -2,7 +2,7 @@ package com.yakushev.spring.presentation.game
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yakushev.spring.domain.GameConstants
+import com.yakushev.spring.domain.Const
 import com.yakushev.spring.domain.model.Direction
 import com.yakushev.spring.domain.model.SnakeState
 import com.yakushev.spring.domain.usecases.GameLoopUseCase
@@ -63,7 +63,7 @@ class GameViewModel @Inject constructor(
     private fun loopJob(): Job = viewModelScope.launch {
         while (true) {
             gameLoopUseCase()
-            delay(GameConstants.DELAY)
+            delay(Const.DELAY)
         }
     }
 

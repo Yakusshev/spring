@@ -5,13 +5,13 @@ data class SnakeState(
     val y: Int,
     val width: Int,
     val length: Int,
-    val turnList: List<Point>,
+    val pointList: List<Point>,
 ) {
     companion object {
         val empty = SnakeState(
             width = 0,
             length = 0,
-            turnList = emptyList(),
+            pointList = emptyList(),
             x = 0,
             y = 0
         )

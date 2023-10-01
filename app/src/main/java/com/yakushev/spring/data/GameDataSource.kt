@@ -1,7 +1,7 @@
 package com.yakushev.spring.data
 
 import android.util.Log
-import com.yakushev.spring.domain.GameConstants.SNAKE_BODY_COEF
+import com.yakushev.spring.domain.Const.SNAKE_BODY_COEF
 import com.yakushev.spring.domain.model.Direction
 import com.yakushev.spring.domain.model.SnakeState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +12,7 @@ class GameDataSource {
 
     private val playState: MutableStateFlow<Boolean> = MutableStateFlow(value = false)
     private val snakeState: MutableStateFlow<SnakeState> = MutableStateFlow(SnakeState.empty)
-    private val directionState: MutableStateFlow<Direction> = MutableStateFlow(Direction.RIGHT)
+    private val directionState: MutableStateFlow<Direction> = MutableStateFlow(Direction.UP)
 
     private var fieldHeight = 0
     private var fieldWidth = 0
