@@ -2,7 +2,7 @@ package com.yakushev.spring.domain.model
 
 data class SnakeModel(
     val width: Int,
-    val pointList: List<PointModel>,
+    val pointList: List<SnakePointModel>,
 ) {
     companion object {
         val empty = SnakeModel(

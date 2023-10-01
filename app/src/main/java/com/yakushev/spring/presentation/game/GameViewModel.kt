@@ -3,15 +3,19 @@ package com.yakushev.spring.presentation.game
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yakushev.spring.domain.Const
+import com.yakushev.spring.domain.loop.GenerateApplesUseCase
+import com.yakushev.spring.domain.loop.HandleCollisionUseCase
+import com.yakushev.spring.domain.loop.MoveSnakeUseCase
+import com.yakushev.spring.domain.model.ApplePointModel
 import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.SnakeModel
-import com.yakushev.spring.domain.usecases.GameLoopUseCase
+import com.yakushev.spring.domain.usecases.GetAppleListStateUseCase
 import com.yakushev.spring.domain.usecases.GetPlayStateUseCase
 import com.yakushev.spring.domain.usecases.GetSnakeLengthUseCase
 import com.yakushev.spring.domain.usecases.GetSnakeStateUseCase
+import com.yakushev.spring.domain.usecases.InitGameUseCase
 import com.yakushev.spring.domain.usecases.SetDirectionUseCase
 import com.yakushev.spring.domain.usecases.SetPlayStateUseCase
-import com.yakushev.spring.domain.usecases.InitGameUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -22,10 +26,13 @@ class GameViewModel @Inject constructor(
     private val setScreenSizeUseCase: InitGameUseCase,
     private val getPlayStateUseCase: GetPlayStateUseCase,
     private val setPlayStateUseCase: SetPlayStateUseCase,
-    private val gameLoopUseCase: GameLoopUseCase,
+    private val gameLoopUseCase: MoveSnakeUseCase,
     private val getSnakeStateUseCase: GetSnakeStateUseCase,
     private val setDirectionUseCase: SetDirectionUseCase,
     private val getSnakeLengthUseCase: GetSnakeLengthUseCase,
+    private val generateApplesUseCase: GenerateApplesUseCase,
+    private val getAppleListStateUseCase: GetAppleListStateUseCase,
+    private val handleCollisionUseCase: HandleCollisionUseCase
 ) : ViewModel() {
 
     private var loopJob: Job? = null
@@ -37,6 +44,7 @@ class GameViewModel @Inject constructor(
     internal fun getPlayState(): StateFlow<Boolean> = getPlayStateUseCase()
     internal fun getSnakeState(): StateFlow<SnakeModel> = getSnakeStateUseCase()
     internal fun getSnakeLengthState(): StateFlow<Int> = getSnakeLengthUseCase()
+    internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
 
     internal fun onInitScreen(width: Int, height: Int) {
         viewModelScope.launch {
@@ -66,12 +74,18 @@ class GameViewModel @Inject constructor(
     }
 
     private fun loopJob(): Job = viewModelScope.launch {
+        var appleTime = 0L
         var current = System.currentTimeMillis()
         while (true) {
             while (System.currentTimeMillis() - current < Const.DELAY) {
                 delay(1)
             }
             gameLoopUseCase()
+            handleCollisionUseCase()
+            if (System.currentTimeMillis() - appleTime >= Const.APPLE_DELAY) {
+                generateApplesUseCase()
+                appleTime = System.currentTimeMillis()
+            }
             current = System.currentTimeMillis()
         }
     }

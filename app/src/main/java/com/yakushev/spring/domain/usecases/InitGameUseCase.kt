@@ -3,7 +3,7 @@ package com.yakushev.spring.domain.usecases
 import com.yakushev.spring.data.GameDataSource
 import com.yakushev.spring.domain.Const
 import com.yakushev.spring.domain.model.EdgeEnum
-import com.yakushev.spring.domain.model.PointModel
+import com.yakushev.spring.domain.model.SnakePointModel
 import javax.inject.Inject
 
 class InitGameUseCase @Inject constructor(
@@ -28,10 +28,10 @@ class InitGameUseCase @Inject constructor(
         gameDataSource.setFieldSize(width, height)
     }
 
-    private fun defaultPointList(width: Int, height: Int): List<PointModel> =
+    private fun defaultPointList(width: Int, height: Int): List<SnakePointModel> =
         listOf(
-            PointModel(x = width / 2, y = height / 2, edge = EdgeEnum.EMPTY),
-            PointModel(x = width / 2, y = height / 2 + calculateSnakeHeight(height), edge = EdgeEnum.EMPTY)
+            SnakePointModel(x = width / 2, y = height / 2, edge = EdgeEnum.EMPTY),
+            SnakePointModel(x = width / 2, y = height / 2 + calculateSnakeHeight(height), edge = EdgeEnum.EMPTY)
         )
 
     private fun calculateSnakeHeight(height: Int): Int {
