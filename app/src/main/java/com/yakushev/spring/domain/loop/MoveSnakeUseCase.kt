@@ -1,5 +1,6 @@
 package com.yakushev.spring.domain.loop
 
+import android.util.Log
 import com.yakushev.spring.data.GameDataSource
 import com.yakushev.spring.domain.Const.SNAKE_SPEED
 import com.yakushev.spring.domain.model.DirectionEnum
@@ -15,6 +16,7 @@ class MoveSnakeUseCase @Inject constructor(
         val inputEdgePointState = MutableStateFlow<SnakePointModel?>(value = null)
         val outputEdgePointState = MutableStateFlow<SnakePointModel?>(value = null)
 
+        Log.d("###", "loopJob: ${dataSource.getDirectionState().value}")
         dataSource.updateSnakeState { snake ->
             snake.copy(
                 pointList = snake.pointList

@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.yakushev.spring.domain.model.ApplePointModel
 import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.EdgeEnum
+import com.yakushev.spring.domain.model.GameState
 import com.yakushev.spring.domain.model.SnakeModel
 import kotlin.math.abs
 
@@ -45,9 +46,9 @@ fun GameScreen(
 
     Field(viewModel)
 
-    val play = viewModel.getPlayState().collectAsState().value
-    BackHandler(enabled = play, onBack = viewModel::onPauseClicked)
-    Menu(play, viewModel::onPlayClicked)
+    val gameState = viewModel.getPlayState().collectAsState().value
+    BackHandler(enabled = gameState != GameState.Pause, onBack = viewModel::onPauseClicked)
+    Menu(viewModel)
 }
 
 @Composable
@@ -63,7 +64,7 @@ fun Field(viewModel: GameViewModel) {
     ) {
         Apples(apples = apples, width = snake.width)
         Snake(snake)
-        GameScore(snakeLength)
+        ScoreText(snakeLength)
     }
 }
 
@@ -125,7 +126,7 @@ private fun Snake(snake: SnakeModel) {
 }
 
 @Composable
-fun BoxScope.GameScore(length: Int) {
+private fun BoxScope.ScoreText(length: Int) {
     Text(
         modifier = Modifier
             .align(Alignment.TopStart)

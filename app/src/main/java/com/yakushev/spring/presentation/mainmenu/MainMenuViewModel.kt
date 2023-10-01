@@ -1,6 +1,7 @@
 package com.yakushev.spring.presentation.mainmenu
 
 import androidx.lifecycle.ViewModel
+import com.yakushev.spring.domain.model.GameState
 import com.yakushev.spring.domain.usecases.GetPlayStateUseCase
 import com.yakushev.spring.domain.usecases.SetPlayStateUseCase
 import kotlinx.coroutines.flow.StateFlow
@@ -10,5 +11,5 @@ class MainMenuViewModel @Inject constructor(
     private val setPlayStateUseCase: SetPlayStateUseCase,
     private val getPlayStateUseCase: GetPlayStateUseCase
 ) : ViewModel() {
-    internal fun getPlayState(): StateFlow<Boolean> = getPlayStateUseCase()
+    internal fun getPlayState(): StateFlow<GameState> = getPlayStateUseCase()
 }

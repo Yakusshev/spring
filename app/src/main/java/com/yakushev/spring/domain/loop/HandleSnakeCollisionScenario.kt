@@ -3,6 +3,7 @@ package com.yakushev.spring.domain.loop
 import android.util.Log
 import com.yakushev.spring.data.GameDataSource
 import com.yakushev.spring.domain.model.EdgeEnum
+import com.yakushev.spring.domain.model.GameState
 import javax.inject.Inject
 
 class HandleSnakeCollisionScenario @Inject constructor(
@@ -42,7 +43,7 @@ class HandleSnakeCollisionScenario @Inject constructor(
                 else -> return@forEachIndexed
             }
             if (collision) {
-                dataSource.setPlay(false)
+                dataSource.setGameState(GameState.Potracheno(length = dataSource.getSnakeLengthState().value))
                 return
             }
         }

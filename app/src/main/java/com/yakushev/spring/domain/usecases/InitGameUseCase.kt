@@ -9,14 +9,20 @@ import javax.inject.Inject
 class InitGameUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
-    operator fun invoke(width: Int, height: Int) {
-        if (gameDataSource.getFieldWidth() == width
-            && gameDataSource.getFieldHeight() == height) return
+    operator fun invoke(
+        width: Int = gameDataSource.getFieldWidth(),
+        height: Int = gameDataSource.getFieldHeight(),
+        reset: Boolean
+    ) {
+        val notExecute = gameDataSource.getFieldWidth() == width
+                && gameDataSource.getFieldHeight() == height
+                && !reset
+        if (notExecute) return
 
         val refSize = if (height > width) height else width
 
         gameDataSource.updateSnakeState { snake ->
-            if (snake.pointList.isEmpty()) {
+            if (snake.pointList.isEmpty() || reset) {
                 snake.copy(
                     pointList = defaultPointList(width, height),
                     width = (refSize * Const.SNAKE_BODY_COEF).toInt()
@@ -31,7 +37,11 @@ class InitGameUseCase @Inject constructor(
     private fun defaultPointList(width: Int, height: Int): List<SnakePointModel> =
         listOf(
             SnakePointModel(x = width / 2, y = height / 2, edge = EdgeEnum.EMPTY),
-            SnakePointModel(x = width / 2, y = height / 2 + calculateSnakeHeight(height), edge = EdgeEnum.EMPTY)
+            SnakePointModel(
+                x = width / 2,
+                y = height / 2 + calculateSnakeHeight(height),
+                edge = EdgeEnum.EMPTY
+            )
         )
 
     private fun calculateSnakeHeight(height: Int): Int {

@@ -10,6 +10,7 @@ import com.yakushev.spring.domain.loop.HandleSnakeCollisionScenario
 import com.yakushev.spring.domain.loop.MoveSnakeUseCase
 import com.yakushev.spring.domain.model.ApplePointModel
 import com.yakushev.spring.domain.model.DirectionEnum
+import com.yakushev.spring.domain.model.GameState
 import com.yakushev.spring.domain.model.SnakeModel
 import com.yakushev.spring.domain.usecases.GetAppleListStateUseCase
 import com.yakushev.spring.domain.usecases.GetPlayStateUseCase
@@ -27,7 +28,7 @@ import javax.inject.Inject
 class GameViewModel @Inject constructor(
     private val initGameUseCase: InitGameUseCase,
     private val getPlayStateUseCase: GetPlayStateUseCase,
-    private val setPlayStateUseCase: SetPlayStateUseCase,
+    private val setGameStateUseCase: SetPlayStateUseCase,
     private val moveSnakeUseCase: MoveSnakeUseCase,
     private val getSnakeStateUseCase: GetSnakeStateUseCase,
     private val setDirectionUseCase: SetDirectionUseCase,
@@ -45,26 +46,26 @@ class GameViewModel @Inject constructor(
         observeGameState()
     }
 
-    internal fun getPlayState(): StateFlow<Boolean> = getPlayStateUseCase()
+    internal fun getPlayState(): StateFlow<GameState> = getPlayStateUseCase()
     internal fun getSnakeState(): StateFlow<SnakeModel> = getSnakeStateUseCase()
     internal fun getSnakeLengthState(): StateFlow<Int> = getSnakeLengthUseCase()
     internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
 
     internal fun onInitScreen(width: Int, height: Int) {
         viewModelScope.launch {
-            initGameUseCase(width, height)
+            initGameUseCase(width, height, reset = false)
         }
     }
 
     internal fun onPlayClicked() {
         viewModelScope.launch {
-            setPlayStateUseCase(play = true)
+            setGameStateUseCase(play = GameState.Play)
             calculateLengthUseCase()
         }
     }
 
     internal fun onPauseClicked() {
-        viewModelScope.launch { setPlayStateUseCase(play = false) }
+        viewModelScope.launch { setGameStateUseCase(play = GameState.Pause) }
     }
 
     internal fun onDirectionChanged(direction: DirectionEnum) {
@@ -75,7 +76,7 @@ class GameViewModel @Inject constructor(
         viewModelScope.launch {
             getPlayStateUseCase().collect { play ->
                 loopJob?.cancel()
-                if (play) loopJob = loopJob()
+                if (play == GameState.Play) loopJob = loopJob()
             }
         }
     }
@@ -98,4 +99,12 @@ class GameViewModel @Inject constructor(
         }
     }
 
+    fun onResetClicked() {
+        viewModelScope.launch {
+            initGameUseCase(reset = true)
+            setDirectionUseCase(direction = Const.DEFAULT_DIRECTION, reset = true)
+            generateApplesUseCase(reset = true)
+            setGameStateUseCase(GameState.Play)
+        }
+    }
 }

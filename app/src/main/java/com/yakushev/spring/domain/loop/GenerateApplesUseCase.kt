@@ -7,11 +7,11 @@ import javax.inject.Inject
 class GenerateApplesUseCase @Inject constructor(
     private val dataSource: GameDataSource
 ) {
-    suspend operator fun invoke() {
+    suspend operator fun invoke(reset: Boolean = false) {
         val height = dataSource.getFieldHeight()
         val width = dataSource.getFieldWidth()
         dataSource.updateAppleListState { list ->
-            if (list.isNotEmpty()) return@updateAppleListState list
+            if (list.isNotEmpty() && !reset) return@updateAppleListState list
             val newList = mutableListOf<ApplePointModel>()
             repeat(3) {
                 newList.add(

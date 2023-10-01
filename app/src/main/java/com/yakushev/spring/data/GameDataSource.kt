@@ -1,7 +1,9 @@
 package com.yakushev.spring.data
 
+import com.yakushev.spring.domain.Const
 import com.yakushev.spring.domain.model.ApplePointModel
 import com.yakushev.spring.domain.model.DirectionEnum
+import com.yakushev.spring.domain.model.GameState
 import com.yakushev.spring.domain.model.SnakeModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,9 +11,9 @@ import kotlinx.coroutines.flow.update
 
 class GameDataSource {
 
-    private val playState: MutableStateFlow<Boolean> = MutableStateFlow(value = false)
+    private val gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState.Pause)
     private val snakeState: MutableStateFlow<SnakeModel> = MutableStateFlow(SnakeModel.empty)
-    private val directionState: MutableStateFlow<DirectionEnum> = MutableStateFlow(DirectionEnum.UP)
+    private val directionState: MutableStateFlow<DirectionEnum> = MutableStateFlow(Const.DEFAULT_DIRECTION)
     private val lengthState: MutableStateFlow<Int> = MutableStateFlow(value = 0)
     private val appleListState: MutableStateFlow<List<ApplePointModel>> = MutableStateFlow(emptyList())
 
@@ -20,7 +22,7 @@ class GameDataSource {
 
     private var snakeBodySize = 0
 
-    fun getPlayState(): StateFlow<Boolean> = playState
+    fun getGameState(): StateFlow<GameState> = gameState
     fun getSnakeState(): StateFlow<SnakeModel> = snakeState
     fun getSnakeLengthState(): StateFlow<Int> = lengthState
     fun getDirectionState(): StateFlow<DirectionEnum> = directionState
@@ -33,8 +35,8 @@ class GameDataSource {
         fieldHeight = height
     }
 
-    suspend fun setPlay(play: Boolean) {
-        playState.emit(play)
+    suspend fun setGameState(play: GameState) {
+        gameState.emit(play)
     }
 
     fun updateSnakeState(function: (state: SnakeModel) -> SnakeModel) {
