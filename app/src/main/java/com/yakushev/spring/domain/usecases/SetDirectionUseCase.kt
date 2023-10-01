@@ -11,6 +11,7 @@ class SetDirectionUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
     operator fun invoke(direction: Direction) {
+        if (!gameDataSource.getPlayState().value) return
         val oldDirection = gameDataSource.getDirectionState().value
         when (oldDirection) {
             direction -> return
@@ -21,10 +22,9 @@ class SetDirectionUseCase @Inject constructor(
             Log.d("###", "invoke: ${snake.pointList}")
             snake.copy(
                 pointList = snake.pointList.toMutableList().apply {
-                    add(0, snake.getCornerPoint(direction))
-//                    val first = snake.getCornerPoint(direction)
-//                    removeAt(0)
-//                    add(0, first)
+                    removeAt(0)
+                    add(0, snake.getCornerPoint(oldDirection))
+                    add(0, snake.getCornerPointHead(direction, oldDirection))
                     Log.d("###", "SetDirectionUseCase: ${this.size}")
                     Log.d("###", "invoke: ${this}")
                 }
@@ -38,10 +38,28 @@ class SetDirectionUseCase @Inject constructor(
         Log.d("###", "getCornerPoint: width $width")
         Log.d("###", "getCornerPoint: direction $direction")
         return when (direction) {
-            Direction.UP -> point.copy(y = point.y - width / 2)
-            Direction.DOWN -> point.copy(y = point.y + width / 2)
-            Direction.RIGHT -> point.copy(x = point.x + width / 2)
-            Direction.LEFT -> point.copy(x = point.x - width / 2)
+            Direction.UP -> point.copy(y = point.y + width / 2)
+            Direction.DOWN -> point.copy(y = point.y - width / 2)
+            Direction.RIGHT -> point.copy(x = point.x - width / 2)
+            Direction.LEFT -> point.copy(x = point.x + width / 2)
+        }
+    }
+
+    private fun SnakeState.getCornerPointHead(direction: Direction, oldDirection: Direction): Point {
+        val point = pointList.first()
+        Log.d("###", "getCornerPoint: width $width")
+        Log.d("###", "getCornerPoint: direction $direction")
+        val new = when (oldDirection) {
+            Direction.UP -> point.copy(y = point.y + width / 2)
+            Direction.DOWN -> point.copy(y = point.y - width / 2)
+            Direction.RIGHT -> point.copy(x = point.x - width / 2)
+            Direction.LEFT -> point.copy(x = point.x + width / 2)
+        }
+        return when (direction) {
+            Direction.UP -> new.copy(y = point.y - width / 2)
+            Direction.DOWN -> new.copy(y = point.y + width / 2)
+            Direction.RIGHT -> new.copy(x = point.x + width / 2)
+            Direction.LEFT -> new.copy(x = point.x - width / 2)
         }
     }
 }
