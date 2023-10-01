@@ -12,45 +12,56 @@ class GameLoopUseCase @Inject constructor(
     private val dataSource: GameDataSource
 ) {
     suspend operator fun invoke() {
-        val headDirection = dataSource.getDirectionState().value
         val edgePointState = MutableStateFlow<PointModel?>(null)
 
         dataSource.updateSnakeState { snake ->
             val lastPointDirection = snake.pointList.getLastPointDirection()
             snake.copy(
-                pointList = snake.pointList.mapIndexed { index, point ->
-                    val direction = snake.pointList.run {
-                        when (index) {
-                            0 -> headDirection
-                            lastIndex -> lastPointDirection
-                            else -> return@mapIndexed point
-                        }
-                    }
-                    when (direction) {
-                        DirectionEnum.UP -> point.up(snake.width, edgePointState)
-                        DirectionEnum.DOWN -> point.down(snake.width, edgePointState)
-                        DirectionEnum.RIGHT -> point.right(snake.width, edgePointState)
-                        DirectionEnum.LEFT -> point.left(snake.width, edgePointState)
-                    }
-                }
-                    .addEdgePoint(edgePointState)
-                    .checkRemoveRange(lastPointDirection)
+                pointList = snake.pointList
+                    .move(snake.width, lastPointDirection, edgePointState)
+                    .toMutableList()
+                    .addEdgePoints(edgePointState)
+                    .removeCornerIfNeed(lastPointDirection)
+                    .removeEdgeIfNeed()
             )
         }
     }
 
-    private fun List<PointModel>.addEdgePoint(edgePointState: MutableStateFlow<PointModel?>): List<PointModel> {
-        return edgePointState.value?.let { point ->
-            toMutableList().apply {
-                add(1, point.copy(edge = EdgeEnum.INPUT))
-                add(1, first().copy(edge = EdgeEnum.OUTPUT))
+    private fun List<PointModel>.move(
+        width: Int,
+        lastPointDirection: DirectionEnum,
+        edgePointState: MutableStateFlow<PointModel?>
+    ): List<PointModel> {
+        val headDirection = dataSource.getDirectionState().value
+        return mapIndexed { index, point ->
+            val direction = when (index) {
+                0 -> headDirection
+                lastIndex -> lastPointDirection
+                else -> return@mapIndexed point
             }
-        } ?: this
+
+            when (direction) {
+                DirectionEnum.UP -> point.up(width, edgePointState)
+                DirectionEnum.DOWN -> point.down(width, edgePointState)
+                DirectionEnum.RIGHT -> point.right(width, edgePointState)
+                DirectionEnum.LEFT -> point.left(width, edgePointState)
+            }
+        }
     }
 
-    private fun List<PointModel>.checkRemoveRange(
+    private fun MutableList<PointModel>.addEdgePoints(
+        edgePointState: MutableStateFlow<PointModel?>
+    ): MutableList<PointModel> {
+        edgePointState.value?.let { point ->
+            add(1, point.copy(edge = EdgeEnum.INPUT))
+            add(1, first().copy(edge = EdgeEnum.OUTPUT))
+        }
+        return this
+    }
+
+    private fun MutableList<PointModel>.removeCornerIfNeed(
         lastPointDirection: DirectionEnum
-    ): List<PointModel> {
+    ): MutableList<PointModel> {
         val lastPoint = this[lastIndex]
         val penultimatePoint = this[lastIndex - 1]
 
@@ -61,31 +72,22 @@ class GameLoopUseCase @Inject constructor(
             DirectionEnum.LEFT -> lastPoint.x <= penultimatePoint.x
         }
 
+        if (removePoint) remove(lastPoint)
+        return this
+    }
 
-        return when {
-            removePoint -> {
-                toMutableList().apply {
-                    remove(lastPoint)
-                }
+    private fun MutableList<PointModel>.removeEdgeIfNeed(): MutableList<PointModel> {
+        val lastPoint = this[lastIndex]
+
+        when (lastPoint.edge) {
+            EdgeEnum.INPUT -> remove(lastPoint)
+            EdgeEnum.OUTPUT -> {
+                remove(lastPoint)
+                add(lastPoint.copy(edge = EdgeEnum.EMPTY))
             }
-            lastPoint.edge == EdgeEnum.INPUT -> {
-                toMutableList().apply {
-                    remove(lastPoint)
-                }
-            }
-//            lastPoint.edge && size > 2 -> {
-//                toMutableList().apply {
-//                    remove(lastPoint)
-//                }
-//            }
-            lastPoint.edge == EdgeEnum.OUTPUT /*&& size == 2*/ -> {
-                toMutableList().apply {
-                    remove(lastPoint)
-                    add(lastPoint.copy(edge = EdgeEnum.EMPTY))
-                }
-            }
-            else -> this
+            EdgeEnum.EMPTY -> {}
         }
+        return this
     }
 
     private fun List<PointModel>.getLastPointDirection(): DirectionEnum {
@@ -99,31 +101,58 @@ class GameLoopUseCase @Inject constructor(
         }
     }
 
-    private fun PointModel.right(width: Int, edgePointState: MutableStateFlow<PointModel?>): PointModel {
+    private fun PointModel.right(
+        width: Int,
+        edgePointState: MutableStateFlow<PointModel?>
+    ): PointModel {
         return copy(
-            x = if (x < dataSource.getFieldWidth()) x + SNAKE_SPEED else teleport(-width, edgePointState)
+            x = if (x < dataSource.getFieldWidth()) x + SNAKE_SPEED else teleport(
+                -width,
+                edgePointState
+            )
         )
     }
 
-    private fun PointModel.left(width: Int, edgePointState: MutableStateFlow<PointModel?>): PointModel {
+    private fun PointModel.left(
+        width: Int,
+        edgePointState: MutableStateFlow<PointModel?>
+    ): PointModel {
         return copy(
-            x = if (x > 0 - width) x - SNAKE_SPEED else teleport(dataSource.getFieldWidth(), edgePointState)
+            x = if (x > 0 - width) x - SNAKE_SPEED else teleport(
+                dataSource.getFieldWidth(),
+                edgePointState
+            )
         )
     }
 
-    private fun PointModel.up(width: Int, edgePointState: MutableStateFlow<PointModel?>): PointModel {
+    private fun PointModel.up(
+        width: Int,
+        edgePointState: MutableStateFlow<PointModel?>
+    ): PointModel {
         return copy(
-            y = if (y > 0 - width) y - SNAKE_SPEED else teleport(dataSource.getFieldHeight(), edgePointState)
+            y = if (y > 0 - width) y - SNAKE_SPEED else teleport(
+                dataSource.getFieldHeight(),
+                edgePointState
+            )
         )
     }
 
-    private fun PointModel.down(width: Int, edgePointState: MutableStateFlow<PointModel?>): PointModel {
+    private fun PointModel.down(
+        width: Int,
+        edgePointState: MutableStateFlow<PointModel?>
+    ): PointModel {
         return copy(
-            y = if (y < dataSource.getFieldHeight()) y + SNAKE_SPEED else teleport(-width, edgePointState)
+            y = if (y < dataSource.getFieldHeight()) y + SNAKE_SPEED else teleport(
+                -width,
+                edgePointState
+            )
         )
     }
 
-    private fun PointModel.teleport(coordinate: Int, edgePointState: MutableStateFlow<PointModel?>): Int {
+    private fun PointModel.teleport(
+        coordinate: Int,
+        edgePointState: MutableStateFlow<PointModel?>
+    ): Int {
         edgePointState.value = this
         return coordinate
     }

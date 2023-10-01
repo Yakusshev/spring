@@ -69,7 +69,6 @@ class GameViewModel @Inject constructor(
                 delay(1)
             }
             gameLoopUseCase()
-//            delay(Const.DELAY)
             current = System.currentTimeMillis()
         }
     }

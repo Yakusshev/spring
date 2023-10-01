@@ -41,11 +41,7 @@ class GameDataSource {
 
     fun updateSnakeState(function: (state: SnakeModel) -> SnakeModel) {
         snakeState.update { state ->
-            Log.d("###", "updateSnakeState: ${state.pointList.size}")
-            function(state).apply {
-                if (pointList.size <= 1) throw Exception("Illegal snake length")
-                Log.d("###", "updateSnakeState: ${pointList.size}")
-            }
+            function(state)
         }
     }
 
