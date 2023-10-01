@@ -6,6 +6,7 @@ import com.yakushev.spring.domain.model.Direction
 import com.yakushev.spring.domain.model.Point
 import com.yakushev.spring.domain.model.SnakeState
 import javax.inject.Inject
+import kotlin.math.abs
 
 class SetDirectionUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
@@ -20,6 +21,13 @@ class SetDirectionUseCase @Inject constructor(
         }
         gameDataSource.updateSnakeState { snake ->
             Log.d("###", "invoke: ${snake.pointList}")
+            if (snake.pointList.size >= 3) {
+                val xDiff = abs(snake.pointList[0].x - snake.pointList[1].x)
+                if (xDiff < snake.width * 1.5 && xDiff != 0) return@updateSnakeState snake
+                val yDiff = abs(snake.pointList[0].y - snake.pointList[1].y)
+                if (yDiff < snake.width * 1.5 && yDiff != 0) return@updateSnakeState snake
+            }
+            gameDataSource.setDirection(direction)
             snake.copy(
                 pointList = snake.pointList.toMutableList().apply {
                     removeAt(0)
@@ -30,7 +38,6 @@ class SetDirectionUseCase @Inject constructor(
                 }
             )
         }
-        gameDataSource.setDirection(direction)
     }
 
     private fun SnakeState.getCornerPoint(direction: Direction): Point {

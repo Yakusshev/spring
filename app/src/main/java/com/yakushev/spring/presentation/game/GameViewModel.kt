@@ -36,7 +36,9 @@ class GameViewModel @Inject constructor(
     internal fun getSnakeState(): StateFlow<SnakeState> = getSnakeStateUseCase()
 
     internal fun onInitScreen(width: Int, height: Int) {
-        setScreenSizeUseCase(width, height)
+        viewModelScope.launch {
+            setScreenSizeUseCase(width, height)
+        }
     }
 
     internal fun onPlayClicked() {
@@ -48,7 +50,7 @@ class GameViewModel @Inject constructor(
     }
 
     internal fun onDirectionChanged(direction: Direction) {
-        setDirectionUseCase(direction = direction)
+        viewModelScope.launch { setDirectionUseCase(direction = direction) }
     }
 
     private fun observeGameState() {
