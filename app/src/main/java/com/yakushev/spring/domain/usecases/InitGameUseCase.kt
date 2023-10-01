@@ -6,16 +6,21 @@ import com.yakushev.spring.domain.model.EdgeEnum
 import com.yakushev.spring.domain.model.PointModel
 import javax.inject.Inject
 
-class SetScreenSizeUseCase @Inject constructor(
+class InitGameUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
     operator fun invoke(width: Int, height: Int) {
         if (gameDataSource.getFieldWidth() == width
             && gameDataSource.getFieldHeight() == height) return
 
+        val refSize = if (height > width) height else width
+
         gameDataSource.updateSnakeState { snake ->
             if (snake.pointList.isEmpty()) {
-                snake.copy(pointList = defaultPointList(width, height))
+                snake.copy(
+                    pointList = defaultPointList(width, height),
+                    width = (refSize * Const.SNAKE_BODY_COEF).toInt()
+                )
             } else {
                 snake
             }
@@ -26,6 +31,12 @@ class SetScreenSizeUseCase @Inject constructor(
     private fun defaultPointList(width: Int, height: Int): List<PointModel> =
         listOf(
             PointModel(x = width / 2, y = height / 2, edge = EdgeEnum.EMPTY),
-            PointModel(x = width / 2, y = height / 2 + (height * Const.SNAKE_LENGTH).toInt(), edge = EdgeEnum.EMPTY)
+            PointModel(x = width / 2, y = height / 2 + calculateSnakeHeight(height), edge = EdgeEnum.EMPTY)
         )
+
+    private fun calculateSnakeHeight(height: Int): Int {
+        val h1 = (height * Const.SNAKE_LENGTH).toInt()
+        val h1mod = h1 % Const.SNAKE_SPEED
+        return h1 - h1mod
+    }
 }

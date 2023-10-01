@@ -11,7 +11,7 @@ import com.yakushev.spring.domain.usecases.GetSnakeLengthUseCase
 import com.yakushev.spring.domain.usecases.GetSnakeStateUseCase
 import com.yakushev.spring.domain.usecases.SetDirectionUseCase
 import com.yakushev.spring.domain.usecases.SetPlayStateUseCase
-import com.yakushev.spring.domain.usecases.SetScreenSizeUseCase
+import com.yakushev.spring.domain.usecases.InitGameUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class GameViewModel @Inject constructor(
-    private val setScreenSizeUseCase: SetScreenSizeUseCase,
+    private val setScreenSizeUseCase: InitGameUseCase,
     private val getPlayStateUseCase: GetPlayStateUseCase,
     private val setPlayStateUseCase: SetPlayStateUseCase,
     private val gameLoopUseCase: GameLoopUseCase,

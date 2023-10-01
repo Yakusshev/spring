@@ -5,7 +5,7 @@ object Const {
     const val DELAY = 1000L / 120L
 
     const val SNAKE_BODY_COEF = 0.025
-    const val SNAKE_SPEED = 10
+    const val SNAKE_SPEED = 12
 
-    const val SNAKE_LENGTH = 0.5
+    const val SNAKE_LENGTH = 0.49
 }
