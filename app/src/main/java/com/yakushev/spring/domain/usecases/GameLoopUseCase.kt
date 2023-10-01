@@ -34,7 +34,9 @@ class GameLoopUseCase @Inject constructor(
         }
     }
 
-    private fun List<Point>.checkRemoveRange(lastPointDirection: Direction): List<Point> {
+    private fun List<Point>.checkRemoveRange(
+        lastPointDirection: Direction
+    ): List<Point> {
         val lastPoint = this[lastIndex]
         val penultimatePoint = this[lastIndex - 1]
 

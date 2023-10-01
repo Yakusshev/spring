@@ -63,9 +63,14 @@ class GameViewModel @Inject constructor(
     }
 
     private fun loopJob(): Job = viewModelScope.launch {
+        var current = System.currentTimeMillis()
         while (true) {
+            while (System.currentTimeMillis() - current < Const.DELAY) {
+                delay(1)
+            }
             gameLoopUseCase()
-            delay(Const.DELAY)
+//            delay(Const.DELAY)
+            current = System.currentTimeMillis()
         }
     }
 

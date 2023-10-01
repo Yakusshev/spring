@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,9 +33,6 @@ fun GameScreen(
     Canvas(modifier = Modifier.fillMaxSize()) {
         viewModel.onInitScreen(size.width.toInt(), size.height.toInt())
     }
-//    LocalConfiguration.current.run {
-//        viewModel.onInitScreen(screenWidthDp * densityDpi, screenHeightDp * densityDpi)
-//    }
 
     Field(viewModel)
 
@@ -92,7 +90,8 @@ private fun Snake(snake: SnakeState) {
             path = path,
             style = Stroke(
                 width = snake.width.toFloat(),
-//                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
+//                miter = 0.01f
+                cap = StrokeCap.Square
             )
         )
     }
