@@ -1,12 +1,12 @@
 package com.yakushev.spring.domain.model
 
-enum class Direction {
+enum class DirectionEnum {
     UP,
     DOWN,
     RIGHT,
     LEFT;
 
-    fun opposite(): Direction =
+    fun opposite(): DirectionEnum =
         when (this) {
             UP -> DOWN
             DOWN -> UP

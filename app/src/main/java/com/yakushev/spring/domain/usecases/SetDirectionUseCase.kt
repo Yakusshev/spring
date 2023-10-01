@@ -2,14 +2,14 @@ package com.yakushev.spring.domain.usecases
 
 import android.util.Log
 import com.yakushev.spring.data.GameDataSource
-import com.yakushev.spring.domain.model.Direction
+import com.yakushev.spring.domain.model.DirectionEnum
 import javax.inject.Inject
 import kotlin.math.abs
 
 class SetDirectionUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
-    operator fun invoke(direction: Direction) {
+    operator fun invoke(direction: DirectionEnum) {
         if (!gameDataSource.getPlayState().value) return
         val oldDirection = gameDataSource.getDirectionState().value
         when (oldDirection) {

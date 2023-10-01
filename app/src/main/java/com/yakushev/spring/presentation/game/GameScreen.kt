@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -21,8 +20,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.yakushev.spring.domain.model.Direction
-import com.yakushev.spring.domain.model.SnakeState
+import com.yakushev.spring.domain.model.DirectionEnum
+import com.yakushev.spring.domain.model.EdgeEnum
+import com.yakushev.spring.domain.model.SnakeModel
 import kotlin.math.abs
 
 @Composable
@@ -54,11 +54,11 @@ fun Field(viewModel: GameViewModel) {
                     val threshold = 5
                     if (abs(x) < threshold && abs(y) < threshold) return@detectDragGestures
                     if (abs(x) > abs(y)) {
-                        if (x > 0) viewModel.onDirectionChanged(Direction.RIGHT)
-                        else viewModel.onDirectionChanged(Direction.LEFT)
+                        if (x > 0) viewModel.onDirectionChanged(DirectionEnum.RIGHT)
+                        else viewModel.onDirectionChanged(DirectionEnum.LEFT)
                     } else {
-                        if (y > 0) viewModel.onDirectionChanged(Direction.DOWN)
-                        else viewModel.onDirectionChanged(Direction.UP)
+                        if (y > 0) viewModel.onDirectionChanged(DirectionEnum.DOWN)
+                        else viewModel.onDirectionChanged(DirectionEnum.UP)
                     }
                 }
             }
@@ -69,36 +69,48 @@ fun Field(viewModel: GameViewModel) {
 
 
 @Composable
-private fun Snake(snake: SnakeState) {
+private fun Snake(snake: SnakeModel) {
     val snakeColor = MaterialTheme.colorScheme.primary
 
-    val points = snake.pointList.map { point ->
-        Offset(point.x.toFloat(), point.y.toFloat())
-    }
+    val points = snake.pointList
 
-    val path = remember { Path() }
-    path.reset()
+    val pathList = mutableListOf<Path>()
 
     points.forEachIndexed { index, point ->
-        if (index == 0) path.moveTo(point.x, point.y)
-        else path.lineTo(point.x, point.y)
+        when {
+            index == 0 -> {
+                pathList.add(remember { Path() }.apply { reset() })
+                pathList.last().moveTo(point.x.toFloat(), point.y.toFloat())
+            }
+            pathList.last().isEmpty -> {
+                pathList.last().moveTo(point.x.toFloat(), point.y.toFloat())
+            }
+            else -> {
+                pathList.last().lineTo(point.x.toFloat(), point.y.toFloat())
+                if (point.edge == EdgeEnum.OUTPUT || point.edge == EdgeEnum.INPUT) {
+                    pathList.add(remember { Path() }.apply { reset() })
+                }
+            }
+        }
     }
 
     Canvas(modifier = Modifier.fillMaxSize()) {
-        drawPath(
-            color = snakeColor,
-            path = path,
-            style = Stroke(
-                width = snake.width.toFloat(),
+        pathList.forEach { currentPath ->
+            drawPath(
+                color = snakeColor,
+                path = currentPath,
+                style = Stroke(
+                    width = snake.width.toFloat(),
 //                miter = 0.01f
-                cap = StrokeCap.Square
+                    cap = StrokeCap.Square
+                )
             )
-        )
+        }
     }
 }
 
 @Composable
-private fun SnakeOld(snake: SnakeState) {
+private fun SnakeOld(snake: SnakeModel) {
     Box(
         modifier = Modifier
             .size(snake.width.dp)

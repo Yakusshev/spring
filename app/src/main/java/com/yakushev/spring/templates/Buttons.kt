@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.yakushev.spring.domain.model.Direction
+import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.presentation.game.GameViewModel
 
 
@@ -32,7 +32,7 @@ private fun BoxWithConstraintsScope.Buttons(viewModel: GameViewModel) {
                     bottom.linkTo(parent.bottom, margin)
                     centerHorizontallyTo(parent)
                 }
-                .directionButtonModifier(viewModel, Direction.DOWN)
+                .directionButtonModifier(viewModel, DirectionEnum.DOWN)
         )
         Box(
             modifier = Modifier
@@ -40,7 +40,7 @@ private fun BoxWithConstraintsScope.Buttons(viewModel: GameViewModel) {
                     bottom.linkTo(buttonDown.top, margin)
                     centerHorizontallyTo(parent)
                 }
-                .directionButtonModifier(viewModel, Direction.UP)
+                .directionButtonModifier(viewModel, DirectionEnum.UP)
         )
         Box(
             modifier = Modifier
@@ -48,7 +48,7 @@ private fun BoxWithConstraintsScope.Buttons(viewModel: GameViewModel) {
                     centerVerticallyTo(parent)
                     start.linkTo(buttonDown.end, margin / 2)
                 }
-                .directionButtonModifier(viewModel, Direction.RIGHT)
+                .directionButtonModifier(viewModel, DirectionEnum.RIGHT)
         )
         Box(
             modifier = Modifier
@@ -56,14 +56,14 @@ private fun BoxWithConstraintsScope.Buttons(viewModel: GameViewModel) {
                     centerVerticallyTo(parent)
                     end.linkTo(buttonDown.start, margin / 2)
                 }
-                .directionButtonModifier(viewModel, Direction.LEFT)
+                .directionButtonModifier(viewModel, DirectionEnum.LEFT)
         )
     }
 }
 
 fun Modifier.directionButtonModifier(
     viewModel: GameViewModel,
-    direction: Direction
+    direction: DirectionEnum
 ): Modifier = this
     .rotate(degrees = 45f)
     .size(64.dp)

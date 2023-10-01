@@ -3,8 +3,8 @@ package com.yakushev.spring.presentation.game
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yakushev.spring.domain.Const
-import com.yakushev.spring.domain.model.Direction
-import com.yakushev.spring.domain.model.SnakeState
+import com.yakushev.spring.domain.model.DirectionEnum
+import com.yakushev.spring.domain.model.SnakeModel
 import com.yakushev.spring.domain.usecases.GameLoopUseCase
 import com.yakushev.spring.domain.usecases.GetPlayStateUseCase
 import com.yakushev.spring.domain.usecases.GetSnakeStateUseCase
@@ -33,7 +33,7 @@ class GameViewModel @Inject constructor(
     }
 
     internal fun getPlayState(): StateFlow<Boolean> = getPlayStateUseCase()
-    internal fun getSnakeState(): StateFlow<SnakeState> = getSnakeStateUseCase()
+    internal fun getSnakeState(): StateFlow<SnakeModel> = getSnakeStateUseCase()
 
     internal fun onInitScreen(width: Int, height: Int) {
         viewModelScope.launch {
@@ -49,7 +49,7 @@ class GameViewModel @Inject constructor(
         viewModelScope.launch { setPlayStateUseCase(play = false) }
     }
 
-    internal fun onDirectionChanged(direction: Direction) {
+    internal fun onDirectionChanged(direction: DirectionEnum) {
         viewModelScope.launch { setDirectionUseCase(direction = direction) }
     }
 

@@ -2,7 +2,8 @@ package com.yakushev.spring.domain.usecases
 
 import com.yakushev.spring.data.GameDataSource
 import com.yakushev.spring.domain.Const
-import com.yakushev.spring.domain.model.Point
+import com.yakushev.spring.domain.model.EdgeEnum
+import com.yakushev.spring.domain.model.PointModel
 import javax.inject.Inject
 
 class SetScreenSizeUseCase @Inject constructor(
@@ -22,9 +23,9 @@ class SetScreenSizeUseCase @Inject constructor(
         gameDataSource.setFieldSize(width, height)
     }
 
-    private fun defaultPointList(width: Int, height: Int): List<Point> =
+    private fun defaultPointList(width: Int, height: Int): List<PointModel> =
         listOf(
-            Point(x = width / 2, y = height / 2),
-            Point(x = width / 2, y = height / 2 + (height * Const.SNAKE_LENGTH).toInt())
+            PointModel(x = width / 2, y = height / 2, edge = EdgeEnum.EMPTY),
+            PointModel(x = width / 2, y = height / 2 + (height * Const.SNAKE_LENGTH).toInt(), edge = EdgeEnum.EMPTY)
         )
 }
