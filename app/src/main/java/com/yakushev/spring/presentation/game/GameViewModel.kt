@@ -7,6 +7,7 @@ import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.SnakeModel
 import com.yakushev.spring.domain.usecases.GameLoopUseCase
 import com.yakushev.spring.domain.usecases.GetPlayStateUseCase
+import com.yakushev.spring.domain.usecases.GetSnakeLengthUseCase
 import com.yakushev.spring.domain.usecases.GetSnakeStateUseCase
 import com.yakushev.spring.domain.usecases.SetDirectionUseCase
 import com.yakushev.spring.domain.usecases.SetPlayStateUseCase
@@ -24,6 +25,7 @@ class GameViewModel @Inject constructor(
     private val gameLoopUseCase: GameLoopUseCase,
     private val getSnakeStateUseCase: GetSnakeStateUseCase,
     private val setDirectionUseCase: SetDirectionUseCase,
+    private val getSnakeLengthUseCase: GetSnakeLengthUseCase,
 ) : ViewModel() {
 
     private var loopJob: Job? = null
@@ -34,6 +36,7 @@ class GameViewModel @Inject constructor(
 
     internal fun getPlayState(): StateFlow<Boolean> = getPlayStateUseCase()
     internal fun getSnakeState(): StateFlow<SnakeModel> = getSnakeStateUseCase()
+    internal fun getSnakeLengthState(): StateFlow<Int> = getSnakeLengthUseCase()
 
     internal fun onInitScreen(width: Int, height: Int) {
         viewModelScope.launch {

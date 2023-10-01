@@ -5,18 +5,23 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,6 +49,7 @@ fun GameScreen(
 @Composable
 fun Field(viewModel: GameViewModel) {
     val snakeState = viewModel.getSnakeState().collectAsState().value
+    val snakeLength = viewModel.getSnakeLengthState().collectAsState().value
     Box(
         Modifier
             .fillMaxSize()
@@ -63,10 +69,22 @@ fun Field(viewModel: GameViewModel) {
                 }
             }
     ) {
+        GameScore(snakeLength)
         Snake(snakeState)
     }
 }
 
+@Composable
+fun BoxScope.GameScore(length: Int) {
+    Text(
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(16.dp),
+        text = length.toString(),
+        color = MaterialTheme.colorScheme.onSurface,
+        fontSize = TextUnit(20f, TextUnitType.Sp)
+    )
+}
 
 @Composable
 private fun Snake(snake: SnakeModel) {
@@ -107,16 +125,6 @@ private fun Snake(snake: SnakeModel) {
             )
         }
     }
-}
-
-@Composable
-private fun SnakeOld(snake: SnakeModel) {
-    Box(
-        modifier = Modifier
-            .size(snake.width.dp)
-//            .offset(x = snake.x.dp, y = snake.y.dp)
-            .background(color = MaterialTheme.colorScheme.primary)
-    )
 }
 
 @Preview

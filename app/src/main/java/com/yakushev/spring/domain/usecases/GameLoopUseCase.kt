@@ -1,5 +1,6 @@
 package com.yakushev.spring.domain.usecases
 
+import android.util.Log
 import com.yakushev.spring.data.GameDataSource
 import com.yakushev.spring.domain.Const.SNAKE_SPEED
 import com.yakushev.spring.domain.model.DirectionEnum
@@ -7,12 +8,13 @@ import com.yakushev.spring.domain.model.EdgeEnum
 import com.yakushev.spring.domain.model.PointModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
+import kotlin.math.abs
 
 class GameLoopUseCase @Inject constructor(
     private val dataSource: GameDataSource
 ) {
     suspend operator fun invoke() {
-        val edgePointState = MutableStateFlow<PointModel?>(null)
+        val edgePointState = MutableStateFlow<PointModel?>(value = null)
 
         dataSource.updateSnakeState { snake ->
             val lastPointDirection = snake.pointList.getLastPointDirection()
@@ -23,9 +25,24 @@ class GameLoopUseCase @Inject constructor(
                     .addEdgePoints(edgePointState)
                     .removeCornerIfNeed(lastPointDirection)
                     .removeEdgeIfNeed()
+                    .calculateLength()
             )
         }
     }
+
+    private fun List<PointModel>.calculateLength(): List<PointModel> =
+        apply {
+            var length = 0
+            forEachIndexed { index, pointModel ->
+                Log.d("###", "calculateLength: index = $index, lastIndex = $lastIndex")
+                length += abs(pointModel.x - this[index + 1].x) +
+                        abs(pointModel.y - this[index + 1].y)
+                if (index == lastIndex - 1) {
+                    dataSource.updateSnakeLength(length)
+                    return@apply
+                }
+            }
+        }
 
     private fun List<PointModel>.move(
         width: Int,

@@ -13,6 +13,7 @@ class GameDataSource {
     private val playState: MutableStateFlow<Boolean> = MutableStateFlow(value = false)
     private val snakeState: MutableStateFlow<SnakeModel> = MutableStateFlow(SnakeModel.empty)
     private val directionState: MutableStateFlow<DirectionEnum> = MutableStateFlow(DirectionEnum.UP)
+    private val lengthState: MutableStateFlow<Int> = MutableStateFlow(value = 0)
 
     private var fieldHeight = 0
     private var fieldWidth = 0
@@ -44,6 +45,12 @@ class GameDataSource {
             function(state)
         }
     }
+
+    fun updateSnakeLength(length: Int) {
+        lengthState.update { length }
+    }
+
+    fun getSnakeLengthState(): StateFlow<Int> = lengthState
 
     fun getDirectionState(): StateFlow<DirectionEnum> = directionState
 
