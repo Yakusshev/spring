@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -104,7 +103,7 @@ private fun SnakeOld(snake: SnakeState) {
     Box(
         modifier = Modifier
             .size(snake.width.dp)
-            .offset(x = snake.x.dp, y = snake.y.dp)
+//            .offset(x = snake.x.dp, y = snake.y.dp)
             .background(color = MaterialTheme.colorScheme.primary)
     )
 }

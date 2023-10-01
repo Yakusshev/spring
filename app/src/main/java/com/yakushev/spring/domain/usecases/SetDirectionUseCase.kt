@@ -4,30 +4,44 @@ import android.util.Log
 import com.yakushev.spring.data.GameDataSource
 import com.yakushev.spring.domain.model.Direction
 import com.yakushev.spring.domain.model.Point
+import com.yakushev.spring.domain.model.SnakeState
 import javax.inject.Inject
 
 class SetDirectionUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
     operator fun invoke(direction: Direction) {
-        when (gameDataSource.getDirectionState().value) {
+        val oldDirection = gameDataSource.getDirectionState().value
+        when (oldDirection) {
             direction -> return
             direction.opposite() -> return
             else -> {}
         }
         gameDataSource.updateSnakeState { snake ->
+            Log.d("###", "invoke: ${snake.pointList}")
             snake.copy(
                 pointList = snake.pointList.toMutableList().apply {
-                    add(1, snake.pointList.first())
+                    add(0, snake.getCornerPoint(direction))
+//                    val first = snake.getCornerPoint(direction)
+//                    removeAt(0)
+//                    add(0, first)
                     Log.d("###", "SetDirectionUseCase: ${this.size}")
+                    Log.d("###", "invoke: ${this}")
                 }
             )
         }
         gameDataSource.setDirection(direction)
     }
 
-    private fun Point.getCornerPoint(): Point {
-
-        return this
+    private fun SnakeState.getCornerPoint(direction: Direction): Point {
+        val point = pointList.first()
+        Log.d("###", "getCornerPoint: width $width")
+        Log.d("###", "getCornerPoint: direction $direction")
+        return when (direction) {
+            Direction.UP -> point.copy(y = point.y - width / 2)
+            Direction.DOWN -> point.copy(y = point.y + width / 2)
+            Direction.RIGHT -> point.copy(x = point.x + width / 2)
+            Direction.LEFT -> point.copy(x = point.x - width / 2)
+        }
     }
 }
