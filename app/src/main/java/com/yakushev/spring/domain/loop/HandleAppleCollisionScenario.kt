@@ -1,16 +1,16 @@
 package com.yakushev.spring.domain.loop
 
-import android.util.Log
 import com.yakushev.spring.data.GameDataSource
 import com.yakushev.spring.domain.Const
 import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.SnakePointModel
 import javax.inject.Inject
 
-class HandleCollisionUseCase @Inject constructor(
+class HandleAppleCollisionScenario @Inject constructor(
     private val dataSource: GameDataSource,
     private val generateApplesUseCase: GenerateApplesUseCase,
     private val getLastPointDirectionUseCase: GetLastPointDirectionUseCase,
+    private val calculateLengthUseCase: CalculateLengthUseCase
 ) {
     suspend operator fun invoke() {
         val snake = dataSource.getSnakeState().value
@@ -23,9 +23,9 @@ class HandleCollisionUseCase @Inject constructor(
             val xCollision = snake.pointList.first().x in apple.x - radius..apple.x + radius
             val yCollision = snake.pointList.first().y in apple.y - radius..apple.y + radius
             if (xCollision && yCollision) {
-                Log.d("###", "collision")
                 newApples.remove(apple)
                 grow()
+                calculateLengthUseCase()
             }
         }
         dataSource.updateAppleListState { newApples }
@@ -38,7 +38,6 @@ class HandleCollisionUseCase @Inject constructor(
             val tailPoint = snake.pointList.last()
             newList.removeLast()
             newList.add(tailPoint.grow())
-            Log.d("###", "grow: $newList")
             snake.copy(pointList = newList)
         }
     }

@@ -7,7 +7,6 @@ import com.yakushev.spring.domain.model.EdgeEnum
 import com.yakushev.spring.domain.model.SnakePointModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
-import kotlin.math.abs
 
 class MoveSnakeUseCase @Inject constructor(
     private val dataSource: GameDataSource
@@ -24,24 +23,9 @@ class MoveSnakeUseCase @Inject constructor(
                     .addEdgePoints(inputEdgePointState, outputEdgePointState)
                     .removeCornerIfNeed()
                     .removeEdgeIfNeed()
-                    .calculateLength()
             )
         }
     }
-
-    private fun List<SnakePointModel>.calculateLength(): List<SnakePointModel> =
-        apply {
-            var length = 0
-            forEachIndexed { index, point ->
-                if (point.edge == EdgeEnum.OUTPUT) return@forEachIndexed
-                length += abs(point.x - this[index + 1].x) +
-                        abs(point.y - this[index + 1].y)
-                if (index == lastIndex - 1) {
-                    dataSource.updateSnakeLength(length)
-                    return@apply
-                }
-            }
-        }
 
     private fun List<SnakePointModel>.move(
         edgePointState: MutableStateFlow<SnakePointModel?>,

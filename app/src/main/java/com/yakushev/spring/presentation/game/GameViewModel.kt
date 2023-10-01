@@ -3,8 +3,10 @@ package com.yakushev.spring.presentation.game
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yakushev.spring.domain.Const
+import com.yakushev.spring.domain.loop.CalculateLengthUseCase
 import com.yakushev.spring.domain.loop.GenerateApplesUseCase
-import com.yakushev.spring.domain.loop.HandleCollisionUseCase
+import com.yakushev.spring.domain.loop.HandleAppleCollisionScenario
+import com.yakushev.spring.domain.loop.HandleSnakeCollisionScenario
 import com.yakushev.spring.domain.loop.MoveSnakeUseCase
 import com.yakushev.spring.domain.model.ApplePointModel
 import com.yakushev.spring.domain.model.DirectionEnum
@@ -23,16 +25,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class GameViewModel @Inject constructor(
-    private val setScreenSizeUseCase: InitGameUseCase,
+    private val initGameUseCase: InitGameUseCase,
     private val getPlayStateUseCase: GetPlayStateUseCase,
     private val setPlayStateUseCase: SetPlayStateUseCase,
-    private val gameLoopUseCase: MoveSnakeUseCase,
+    private val moveSnakeUseCase: MoveSnakeUseCase,
     private val getSnakeStateUseCase: GetSnakeStateUseCase,
     private val setDirectionUseCase: SetDirectionUseCase,
     private val getSnakeLengthUseCase: GetSnakeLengthUseCase,
     private val generateApplesUseCase: GenerateApplesUseCase,
     private val getAppleListStateUseCase: GetAppleListStateUseCase,
-    private val handleCollisionUseCase: HandleCollisionUseCase
+    private val handleAppleCollisionScenario: HandleAppleCollisionScenario,
+    private val calculateLengthUseCase: CalculateLengthUseCase,
+    private val handleSnakeCollisionScenario: HandleSnakeCollisionScenario,
 ) : ViewModel() {
 
     private var loopJob: Job? = null
@@ -48,12 +52,15 @@ class GameViewModel @Inject constructor(
 
     internal fun onInitScreen(width: Int, height: Int) {
         viewModelScope.launch {
-            setScreenSizeUseCase(width, height)
+            initGameUseCase(width, height)
         }
     }
 
     internal fun onPlayClicked() {
-        viewModelScope.launch { setPlayStateUseCase(play = true) }
+        viewModelScope.launch {
+            setPlayStateUseCase(play = true)
+            calculateLengthUseCase()
+        }
     }
 
     internal fun onPauseClicked() {
@@ -80,8 +87,9 @@ class GameViewModel @Inject constructor(
             while (System.currentTimeMillis() - current < Const.DELAY) {
                 delay(1)
             }
-            gameLoopUseCase()
-            handleCollisionUseCase()
+            moveSnakeUseCase()
+            handleAppleCollisionScenario()
+            handleSnakeCollisionScenario()
             if (System.currentTimeMillis() - appleTime >= Const.APPLE_DELAY) {
                 generateApplesUseCase()
                 appleTime = System.currentTimeMillis()
