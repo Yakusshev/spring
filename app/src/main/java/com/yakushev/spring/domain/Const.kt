@@ -9,7 +9,7 @@ object Const {
     const val SNAKE_SPEED = 12
     const val GROW = 3 * SNAKE_SPEED
 
-    const val SNAKE_LENGTH = 0.1
+    const val SNAKE_LENGTH = 0.05
 
     const val APPLE_DELAY = 5 * 1000L
 

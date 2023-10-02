@@ -1,4 +1,4 @@
-package com.yakushev.spring.presentation.game
+package com.yakushev.spring.presentation.game.compose
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import com.yakushev.spring.domain.model.GameState
+import com.yakushev.spring.presentation.game.GameViewModel
 import kotlinx.coroutines.delay
 
 
@@ -47,7 +48,7 @@ fun Menu(viewModel: GameViewModel) {
         delay(500)
     }
 
-    when (viewModel.getPlayState().collectAsState().value) {
+    when (viewModel.getGameState().collectAsState().value) {
         GameState.Pause -> PlayButton(alpha = alphaAnimation.value, playClick = viewModel::onPlayClicked)
         GameState.Play -> {}
         is GameState.Potracheno -> Potracheno(alpha = alphaAnimation.value, onClick = viewModel::onResetClicked)

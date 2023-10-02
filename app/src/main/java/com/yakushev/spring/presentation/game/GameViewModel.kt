@@ -46,7 +46,7 @@ class GameViewModel @Inject constructor(
         observeGameState()
     }
 
-    internal fun getPlayState(): StateFlow<GameState> = getPlayStateUseCase()
+    internal fun getGameState(): StateFlow<GameState> = getPlayStateUseCase()
     internal fun getSnakeState(): StateFlow<SnakeModel> = getSnakeStateUseCase()
     internal fun getSnakeLengthState(): StateFlow<Int> = getSnakeLengthUseCase()
     internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
@@ -61,6 +61,14 @@ class GameViewModel @Inject constructor(
         viewModelScope.launch {
             setGameStateUseCase(play = GameState.Play)
             calculateLengthUseCase()
+        }
+    }
+
+    internal fun onBackPressed() {
+        when (getGameState().value) {
+            GameState.Pause -> {}
+            GameState.Play -> onPauseClicked()
+            is GameState.Potracheno -> resetGame(GameState.Pause)
         }
     }
 
@@ -99,12 +107,17 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    fun onResetClicked() {
+    internal fun onResetClicked() {
+        resetGame(GameState.Play)
+    }
+
+    private fun resetGame(gameState: GameState) {
         viewModelScope.launch {
             initGameUseCase(reset = true)
             setDirectionUseCase(direction = Const.DEFAULT_DIRECTION, reset = true)
             generateApplesUseCase(reset = true)
-            setGameStateUseCase(GameState.Play)
+            calculateLengthUseCase()
+            setGameStateUseCase(gameState)
         }
     }
 }

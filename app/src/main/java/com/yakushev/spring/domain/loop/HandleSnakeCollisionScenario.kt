@@ -29,13 +29,13 @@ class HandleSnakeCollisionScenario @Inject constructor(
             Log.d("###", "poi2: ${nextPoint.x}, ${nextPoint.y}")
             val collision = when {
                 point.x == nextPoint.x -> {
-                    val y = head.y in point.y..nextPoint.y
+                    val y = head.y in point.y..nextPoint.y || head.y in nextPoint.y..point.y
                     val x = head.x in point.x - radius..point.x + radius
                     Log.d("###", "point.x == nextPoint.x: x = $x, y = $y")
                     x && y
                 }
                 point.y == nextPoint.y -> {
-                    val x = head.x in point.x..nextPoint.x
+                    val x = head.x in point.x..nextPoint.x || head.x in nextPoint.x..point.x
                     val y = head.y in point.y - radius..point.y + radius
                     Log.d("###", "point.y == nextPoint.y: x = $x, y = $y")
                     x && y
