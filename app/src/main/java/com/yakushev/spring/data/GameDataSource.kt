@@ -14,23 +14,23 @@ class GameDataSource {
     private val gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState.Pause)
     private val snakeState: MutableStateFlow<SnakeModel> = MutableStateFlow(SnakeModel.empty)
     private val directionState: MutableStateFlow<DirectionEnum> = MutableStateFlow(Const.DEFAULT_DIRECTION)
-    private val lengthState: MutableStateFlow<Int> = MutableStateFlow(value = 0)
+    private val lengthState: MutableStateFlow<Float> = MutableStateFlow(value = 0f)
     private val appleListState: MutableStateFlow<List<ApplePointModel>> = MutableStateFlow(emptyList())
 
-    private var fieldHeight = 0
-    private var fieldWidth = 0
+    private var fieldHeight = 0f
+    private var fieldWidth = 0f
 
     private var snakeBodySize = 0
 
     fun getGameState(): StateFlow<GameState> = gameState
     fun getSnakeState(): StateFlow<SnakeModel> = snakeState
-    fun getSnakeLengthState(): StateFlow<Int> = lengthState
+    fun getSnakeLengthState(): StateFlow<Float> = lengthState
     fun getDirectionState(): StateFlow<DirectionEnum> = directionState
     fun getAppleListState(): StateFlow<List<ApplePointModel>> = appleListState
-    fun getFieldHeight(): Int = fieldHeight
-    fun getFieldWidth(): Int = fieldWidth
+    fun getFieldHeight(): Float = fieldHeight
+    fun getFieldWidth(): Float = fieldWidth
 
-    fun setFieldSize(width: Int, height: Int) {
+    fun setFieldSize(width: Float, height: Float) {
         fieldWidth = width
         fieldHeight = height
     }
@@ -45,7 +45,7 @@ class GameDataSource {
         }
     }
 
-    fun updateSnakeLength(length: Int) {
+    fun updateSnakeLength(length: Float) {
         lengthState.update { length }
     }
 

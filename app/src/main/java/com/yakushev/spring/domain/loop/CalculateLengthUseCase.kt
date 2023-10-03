@@ -13,14 +13,14 @@ class CalculateLengthUseCase @Inject constructor(
         try {
             dataSource.getSnakeState().value.pointList.calculateLength()
         } catch (e: Exception) {
-            dataSource.updateSnakeLength(-1)
+            dataSource.updateSnakeLength(-1f)
             e.printStackTrace()
         }
     }
 
     private fun List<SnakePointModel>.calculateLength(): List<SnakePointModel> =
         apply {
-            var length = 0
+            var length = 0f
             forEachIndexed { index, point ->
                 if (point.edge == EdgeEnum.OUTPUT) return@forEachIndexed
                 length += abs(point.x - this[index + 1].x) +

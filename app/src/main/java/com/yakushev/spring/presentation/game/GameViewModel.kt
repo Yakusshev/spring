@@ -51,10 +51,10 @@ class GameViewModel @Inject constructor(
     internal fun getGameState(): StateFlow<GameState> = getPlayStateUseCase()
     internal fun getSnakeState(): Flow<SnakeUiModel> = getSnakeStateUseCase()
         .map { snakeModel -> snakeModel.toSnakeUiModel() }
-    internal fun getSnakeLengthState(): StateFlow<Int> = getSnakeLengthUseCase()
+    internal fun getSnakeLengthState(): StateFlow<Float> = getSnakeLengthUseCase()
     internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
 
-    internal fun onInitScreen(width: Int, height: Int) {
+    internal fun onInitScreen(width: Float, height: Float) {
         viewModelScope.launch {
             initGameUseCase(width, height, reset = false)
         }
@@ -86,13 +86,13 @@ class GameViewModel @Inject constructor(
     private fun observeGameState() {
         viewModelScope.launch {
             val jobs: MutableList<Job> = mutableListOf()
-            getPlayStateUseCase().collect { play ->
+            getGameState().collect { play ->
                 jobs.forEach { job -> job.cancel() }
                 jobs.clear()
                 if (play == GameState.Play) {
                     jobs.addAll(
                         listOf(
-                            loopJob { moveSnakeUseCase() },
+                            loopJob { deviation -> moveSnakeUseCase(deviation) },
                             loopJob { handleAppleCollisionScenario() },
                             loopJob { handleSnakeCollisionScenario() },
                             loopJob { generateApplesUseCase() }
@@ -104,12 +104,12 @@ class GameViewModel @Inject constructor(
     }
 
     private fun loopJob(
-        function: suspend () -> Unit
+        function: suspend (deviation: Float) -> Unit
     ): Job = viewModelScope.launch(Dispatchers.IO) {
         var current = System.currentTimeMillis()
         while (true) {
             while (System.currentTimeMillis() - current < Const.DELAY) delay(timeMillis = 1)
-            function()
+            function((System.currentTimeMillis() - current) / Const.DELAY)
             current = System.currentTimeMillis()
         }
     }

@@ -10,8 +10,8 @@ class InitGameUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
     operator fun invoke(
-        width: Int = gameDataSource.getFieldWidth(),
-        height: Int = gameDataSource.getFieldHeight(),
+        width: Float = gameDataSource.getFieldWidth(),
+        height: Float = gameDataSource.getFieldHeight(),
         reset: Boolean
     ) {
         val notExecute = gameDataSource.getFieldWidth() == width
@@ -25,7 +25,7 @@ class InitGameUseCase @Inject constructor(
             if (snake.pointList.isEmpty() || reset) {
                 snake.copy(
                     pointList = defaultPointList(width, height),
-                    width = (refSize * Const.SNAKE_BODY_COEF).toInt()
+                    width = (refSize * Const.SNAKE_BODY_COEF)
                 )
             } else {
                 snake
@@ -34,7 +34,7 @@ class InitGameUseCase @Inject constructor(
         gameDataSource.setFieldSize(width, height)
     }
 
-    private fun defaultPointList(width: Int, height: Int): List<SnakePointModel> =
+    private fun defaultPointList(width: Float, height: Float): List<SnakePointModel> =
         listOf(
             SnakePointModel(x = width / 2, y = height / 2, edge = EdgeEnum.EMPTY),
             SnakePointModel(
@@ -44,7 +44,7 @@ class InitGameUseCase @Inject constructor(
             )
         )
 
-    private fun calculateSnakeHeight(height: Int): Int {
+    private fun calculateSnakeHeight(height: Float): Float {
         val h1 = (height * Const.SNAKE_LENGTH).toInt()
         val h1mod = h1 % Const.SNAKE_SPEED
         return h1 - h1mod

@@ -25,12 +25,12 @@ fun NeonApples(apples: List<ApplePointModel>, width: Float) {
         apples.forEach { apple ->
             drawIntoCanvas { canvas ->
                 canvas.drawCircle(
-                    center = Offset(apple.x.toFloat(), apple.y.toFloat()),
+                    center = Offset(apple.x, apple.y),
                     radius = width / 3f,
                     paint = neonPaint
                 )
                 canvas.drawCircle(
-                    center = Offset(apple.x.toFloat(), apple.y.toFloat()),
+                    center = Offset(apple.x, apple.y),
                     radius = width / 3f,
                     paint = whitePaint
                 )
@@ -47,7 +47,7 @@ internal fun Apples(apples: List<ApplePointModel>, width: Int) {
             drawRect(
                 color = appleColor,
                 size = Size(1f, 1f),
-                topLeft = Offset(apple.x.toFloat(), apple.y.toFloat()),
+                topLeft = Offset(apple.x, apple.y),
                 style = Stroke(
                     width = width.toFloat(),
                     cap = StrokeCap.Square

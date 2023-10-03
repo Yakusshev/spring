@@ -92,19 +92,19 @@ internal fun getWhitePaint(width: Float, onSurface: Color, style: PaintingStyle)
         strokeWidth = width / 2f
         color = onSurface
         strokeCap = StrokeCap.Round
-        pathEffect = PathEffect.cornerPathEffect(width.toFloat())
+        pathEffect = PathEffect.cornerPathEffect(width)
     }
 
 internal fun getNeonPaint(width: Float, alpha: Float, neonColor: Color): Paint =
     Paint().apply {
         style = PaintingStyle.Stroke
-        strokeWidth = width.toFloat()
+        strokeWidth = width
         strokeCap = StrokeCap.Round
-        pathEffect = PathEffect.cornerPathEffect(width.toFloat())
+        pathEffect = PathEffect.cornerPathEffect(width)
         color = Color.Transparent
         asFrameworkPaint().apply {
             setShadowLayer(
-                width.toFloat(),
+                width,
                 0f,
                 0f,
                 neonColor.copy(alpha = alpha).toArgb()

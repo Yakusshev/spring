@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.yakushev.spring.presentation.game.compose.GameScreen
+import com.yakushev.spring.presentation.game.GameScreen
 
 @Composable
 fun SetupNavHost(

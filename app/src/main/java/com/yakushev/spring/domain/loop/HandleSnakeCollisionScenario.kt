@@ -43,7 +43,7 @@ class HandleSnakeCollisionScenario @Inject constructor(
                 else -> return@forEachIndexed
             }
             if (collision) {
-                dataSource.setGameState(GameState.Potracheno(length = dataSource.getSnakeLengthState().value))
+                dataSource.setGameState(GameState.Potracheno(length = dataSource.getSnakeLengthState().value.toInt()))
                 return
             }
         }

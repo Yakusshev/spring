@@ -7,6 +7,6 @@ import javax.inject.Inject
 class GetSnakeLengthUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
-    operator fun invoke(): StateFlow<Int> =
+    operator fun invoke(): StateFlow<Float> =
         gameDataSource.getSnakeLengthState()
 }
