@@ -1,6 +1,5 @@
 package com.yakushev.spring.presentation.game
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yakushev.spring.domain.Const
@@ -45,8 +44,6 @@ class GameViewModel @Inject constructor(
     private val handleSnakeCollisionScenario: HandleSnakeCollisionScenario,
 ) : ViewModel() {
 
-    private var loopJob: Job? = null
-
     init {
         observeGameState()
     }
@@ -88,31 +85,31 @@ class GameViewModel @Inject constructor(
 
     private fun observeGameState() {
         viewModelScope.launch {
+            val jobs: MutableList<Job> = mutableListOf()
             getPlayStateUseCase().collect { play ->
-                loopJob?.cancel()
-                if (play == GameState.Play) loopJob = loopJob()
+                jobs.forEach { job -> job.cancel() }
+                jobs.clear()
+                if (play == GameState.Play) {
+                    jobs.addAll(
+                        listOf(
+                            loopJob { moveSnakeUseCase() },
+                            loopJob { handleAppleCollisionScenario() },
+                            loopJob { handleSnakeCollisionScenario() },
+                            loopJob { generateApplesUseCase() }
+                        )
+                    )
+                }
             }
         }
     }
 
-    private fun loopJob(): Job = viewModelScope.launch(Dispatchers.IO) {
-        var fpsTime = System.currentTimeMillis()
+    private fun loopJob(
+        function: suspend () -> Unit
+    ): Job = viewModelScope.launch(Dispatchers.IO) {
         var current = System.currentTimeMillis()
-        var frames = 0
         while (true) {
-            while (System.currentTimeMillis() - current < Const.DELAY) {
-                delay(1)
-            }
-            launch { moveSnakeUseCase() }
-            launch { handleAppleCollisionScenario() }
-            launch { handleSnakeCollisionScenario() }
-            launch { generateApplesUseCase() }
-            frames++
-            if ((System.currentTimeMillis() - fpsTime) >= 1000) {
-                Log.d("###", "fps: $frames")
-                frames = 0
-                fpsTime = System.currentTimeMillis()
-            }
+            while (System.currentTimeMillis() - current < Const.DELAY) delay(timeMillis = 1)
+            function()
             current = System.currentTimeMillis()
         }
     }
