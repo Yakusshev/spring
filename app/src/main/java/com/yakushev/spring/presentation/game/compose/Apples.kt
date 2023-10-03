@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import com.yakushev.spring.domain.model.ApplePointModel
 
 @Composable
-fun NeonApples(apples: List<ApplePointModel>, width: Int) {
+fun NeonApples(apples: List<ApplePointModel>, width: Float) {
     val appleColor = Color.Red
     val onSurface = MaterialTheme.colorScheme.onSurface
     val neonPaint = remember(width) { getNeonPaint(width, 1f, appleColor) }
@@ -35,15 +35,6 @@ fun NeonApples(apples: List<ApplePointModel>, width: Int) {
                     paint = whitePaint
                 )
             }
-//            drawRect(
-//                color = appleColor,
-//                size = Size(1f, 1f),
-//                topLeft = Offset(apple.x.toFloat(), apple.y.toFloat()),
-//                style = Stroke(
-//                    width = width.toFloat(),
-//                    cap = StrokeCap.Square
-//                )
-//            )
         }
     }
 }

@@ -7,4 +7,12 @@ data class SnakeUiModel(
     val pointList: List<Offset>,
     val pathList: List<Path>,
     val width: Float
-)
+) {
+    companion object {
+        val empty = SnakeUiModel(
+            pointList = emptyList(),
+            pathList = emptyList(),
+            width = 0f
+        )
+    }
+}

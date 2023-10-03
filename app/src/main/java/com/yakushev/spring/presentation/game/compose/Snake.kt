@@ -15,17 +15,14 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
-import com.yakushev.spring.domain.model.EdgeEnum
-import com.yakushev.spring.domain.model.SnakeModel
-import com.yakushev.spring.domain.model.SnakePointModel
+import com.yakushev.spring.presentation.game.model.SnakeUiModel
 
 @Composable
-internal fun Snake(snake: SnakeModel) {
+internal fun Snake(snake: SnakeUiModel) {
     val snakeColor = MaterialTheme.colorScheme.primary
     val points = snake.pointList.ifEmpty { return }
-    val pathList = remember(points) { points.getPathList() }
 
-    NeonSnake(snake, points, pathList)
+    NeonSnake(snake, points, snake.pathList)
 
 //            drawPath(
 //                brush = paint.asFrameworkPaint().,
@@ -50,8 +47,8 @@ internal fun Snake(snake: SnakeModel) {
 
 @Composable
 private fun NeonSnake(
-    snake: SnakeModel,
-    points: List<SnakePointModel>,
+    snake: SnakeUiModel,
+    points: List<Offset>,
     pathList: List<Path>
 ) {
     val neonColor = Color.Green//MaterialTheme.colorScheme.primary
@@ -71,7 +68,7 @@ private fun NeonSnake(
     Canvas(modifier = Modifier.fillMaxSize()) {
         drawIntoCanvas { canvas ->
             canvas.drawCircle(
-                center = Offset(x = points.first().x.toFloat(), y = points.first().y.toFloat()),
+                center = points.first(),
                 paint = headPaint,
                 radius = snake.width / 2f
             )
@@ -89,7 +86,7 @@ private fun NeonSnake(
     }
 }
 
-internal fun getWhitePaint(width: Int, onSurface: Color, style: PaintingStyle): Paint =
+internal fun getWhitePaint(width: Float, onSurface: Color, style: PaintingStyle): Paint =
     Paint().apply {
         this.style = style
         strokeWidth = width / 2f
@@ -98,7 +95,7 @@ internal fun getWhitePaint(width: Int, onSurface: Color, style: PaintingStyle): 
         pathEffect = PathEffect.cornerPathEffect(width.toFloat())
     }
 
-internal fun getNeonPaint(width: Int, alpha: Float, neonColor: Color): Paint =
+internal fun getNeonPaint(width: Float, alpha: Float, neonColor: Color): Paint =
     Paint().apply {
         style = PaintingStyle.Stroke
         strokeWidth = width.toFloat()
@@ -114,28 +111,3 @@ internal fun getNeonPaint(width: Int, alpha: Float, neonColor: Color): Paint =
             )
         }
     }
-
-//TODO во вьюмодель
-private fun List<SnakePointModel>.getPathList(): List<Path> {
-    val pathList = mutableListOf<Path>()
-
-    forEachIndexed { index, point ->
-        when {
-            index == 0 -> {
-                pathList.add(Path().apply { reset() })
-                pathList.last().moveTo(point.x.toFloat(), point.y.toFloat())
-            }
-            pathList.last().isEmpty -> {
-                pathList.last().moveTo(point.x.toFloat(), point.y.toFloat())
-            }
-            else -> {
-                pathList.last().lineTo(point.x.toFloat(), point.y.toFloat())
-                if (point.edge == EdgeEnum.OUTPUT || point.edge == EdgeEnum.INPUT) {
-                    pathList.add(Path().apply { reset() })
-                }
-            }
-        }
-    }
-
-    return pathList
-}

@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.GameState
 import com.yakushev.spring.presentation.game.GameViewModel
+import com.yakushev.spring.presentation.game.model.SnakeUiModel
 import kotlin.math.abs
 
 @Composable
@@ -57,7 +58,7 @@ fun GameScreen(
 
 @Composable
 fun Field(viewModel: GameViewModel) {
-    val snake = viewModel.getSnakeState().collectAsState().value
+    val snake = viewModel.getSnakeState().collectAsState(initial = SnakeUiModel.empty).value
     val apples = viewModel.getAppleListState().collectAsState().value
     val snakeLength = viewModel.getSnakeLengthState().collectAsState().value
     Box(

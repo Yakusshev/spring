@@ -1,5 +1,6 @@
 package com.yakushev.spring.presentation.game
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yakushev.spring.domain.Const
@@ -11,7 +12,6 @@ import com.yakushev.spring.domain.loop.MoveSnakeUseCase
 import com.yakushev.spring.domain.model.ApplePointModel
 import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.GameState
-import com.yakushev.spring.domain.model.SnakeModel
 import com.yakushev.spring.domain.usecases.GetAppleListStateUseCase
 import com.yakushev.spring.domain.usecases.GetPlayStateUseCase
 import com.yakushev.spring.domain.usecases.GetSnakeLengthUseCase
@@ -19,9 +19,14 @@ import com.yakushev.spring.domain.usecases.GetSnakeStateUseCase
 import com.yakushev.spring.domain.usecases.InitGameUseCase
 import com.yakushev.spring.domain.usecases.SetDirectionUseCase
 import com.yakushev.spring.domain.usecases.SetPlayStateUseCase
+import com.yakushev.spring.presentation.game.mapper.toSnakeUiModel
+import com.yakushev.spring.presentation.game.model.SnakeUiModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,7 +52,8 @@ class GameViewModel @Inject constructor(
     }
 
     internal fun getGameState(): StateFlow<GameState> = getPlayStateUseCase()
-    internal fun getSnakeState(): StateFlow<SnakeModel> = getSnakeStateUseCase()
+    internal fun getSnakeState(): Flow<SnakeUiModel> = getSnakeStateUseCase()
+        .map { snakeModel -> snakeModel.toSnakeUiModel() }
     internal fun getSnakeLengthState(): StateFlow<Int> = getSnakeLengthUseCase()
     internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
 
@@ -89,19 +95,23 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    private fun loopJob(): Job = viewModelScope.launch {
-        var appleTime = 0L
+    private fun loopJob(): Job = viewModelScope.launch(Dispatchers.IO) {
+        var fpsTime = System.currentTimeMillis()
         var current = System.currentTimeMillis()
+        var frames = 0
         while (true) {
             while (System.currentTimeMillis() - current < Const.DELAY) {
                 delay(1)
             }
-            moveSnakeUseCase()
-            handleAppleCollisionScenario()
-            handleSnakeCollisionScenario()
-            if (System.currentTimeMillis() - appleTime >= Const.APPLE_DELAY) {
-                generateApplesUseCase()
-                appleTime = System.currentTimeMillis()
+            launch { moveSnakeUseCase() }
+            launch { handleAppleCollisionScenario() }
+            launch { handleSnakeCollisionScenario() }
+            launch { generateApplesUseCase() }
+            frames++
+            if ((System.currentTimeMillis() - fpsTime) >= 1000) {
+                Log.d("###", "fps: $frames")
+                frames = 0
+                fpsTime = System.currentTimeMillis()
             }
             current = System.currentTimeMillis()
         }
