@@ -1,5 +1,6 @@
 package com.yakushev.spring.domain.loop
 
+import android.util.Log
 import com.yakushev.spring.data.GameDataSource
 import com.yakushev.spring.domain.Const.SNAKE_SPEED
 import com.yakushev.spring.domain.model.DirectionEnum
@@ -11,14 +12,19 @@ import javax.inject.Inject
 class MoveSnakeUseCase @Inject constructor(
     private val dataSource: GameDataSource
 ) {
-    suspend operator fun invoke() {
+    private var speed = SNAKE_SPEED
+
+    suspend operator fun invoke(deviation: Float) {
         val inputEdgePointState = MutableStateFlow<SnakePointModel?>(value = null)
         val outputEdgePointState = MutableStateFlow<SnakePointModel?>(value = null)
+        speed = SNAKE_SPEED //* deviation
+        Log.d("###", "invoke: speed = $speed")
 
         dataSource.updateSnakeState { snake ->
+            Log.d("###", "move: snake = $snake")
             snake.copy(
                 pointList = snake.pointList
-                    .move(inputEdgePointState, outputEdgePointState)
+                    .move(inputEdgePointState, outputEdgePointState, deviation)
                     .toMutableList()
                     .addEdgePoints(inputEdgePointState, outputEdgePointState)
                     .removeCornerIfNeed()
@@ -29,7 +35,8 @@ class MoveSnakeUseCase @Inject constructor(
 
     private fun List<SnakePointModel>.move(
         edgePointState: MutableStateFlow<SnakePointModel?>,
-        outputEdgePointState: MutableStateFlow<SnakePointModel?>
+        outputEdgePointState: MutableStateFlow<SnakePointModel?>,
+        deviation: Float
     ): List<SnakePointModel> {
         val headDirection = dataSource.getDirectionState().value
         return mapIndexed { index, point ->
@@ -40,10 +47,10 @@ class MoveSnakeUseCase @Inject constructor(
             }
 
             when (direction) {
-                DirectionEnum.UP -> point.up(edgePointState, outputEdgePointState)
-                DirectionEnum.DOWN -> point.down(edgePointState, outputEdgePointState)
-                DirectionEnum.RIGHT -> point.right(edgePointState, outputEdgePointState)
-                DirectionEnum.LEFT -> point.left(edgePointState, outputEdgePointState)
+                DirectionEnum.UP -> point.up(edgePointState, outputEdgePointState, deviation)
+                DirectionEnum.DOWN -> point.down(edgePointState, outputEdgePointState, deviation)
+                DirectionEnum.RIGHT -> point.right(edgePointState, outputEdgePointState, deviation)
+                DirectionEnum.LEFT -> point.left(edgePointState, outputEdgePointState, deviation)
             }
         }
     }
@@ -101,13 +108,14 @@ class MoveSnakeUseCase @Inject constructor(
 
     private fun SnakePointModel.right(
         edgePointState: MutableStateFlow<SnakePointModel?>,
-        outputEdgePointState: MutableStateFlow<SnakePointModel?>
+        outputEdgePointState: MutableStateFlow<SnakePointModel?>,
+        deviation: Float
     ): SnakePointModel {
         return copy(
-            x = if (x < dataSource.getFieldWidth()) x + SNAKE_SPEED else {
-                outputEdgePointState.value = this.copy(x = 0)
+            x = if (x < dataSource.getFieldWidth()) x + speed else {
+                outputEdgePointState.value = this.copy(x = 0f)
                 teleport(
-                    0 + SNAKE_SPEED,
+                    0 + speed,
                     edgePointState,
                 )
             }
@@ -116,13 +124,14 @@ class MoveSnakeUseCase @Inject constructor(
 
     private fun SnakePointModel.left(
         edgePointState: MutableStateFlow<SnakePointModel?>,
-        outputEdgePointState: MutableStateFlow<SnakePointModel?>
+        outputEdgePointState: MutableStateFlow<SnakePointModel?>,
+        deviation: Float
     ): SnakePointModel {
         return copy(
-            x = if (x > 0) x - SNAKE_SPEED else {
+            x = if (x > 0) x - speed else {
                 outputEdgePointState.value = this.copy(x = dataSource.getFieldWidth())
                 teleport(
-                    dataSource.getFieldWidth() - SNAKE_SPEED,
+                    dataSource.getFieldWidth() - speed,
                     edgePointState,
                 )
             }
@@ -131,13 +140,14 @@ class MoveSnakeUseCase @Inject constructor(
 
     private fun SnakePointModel.up(
         edgePointState: MutableStateFlow<SnakePointModel?>,
-        outputEdgePointState: MutableStateFlow<SnakePointModel?>
+        outputEdgePointState: MutableStateFlow<SnakePointModel?>,
+        deviation: Float
     ): SnakePointModel {
         return copy(
-            y = if (y > 0) y - SNAKE_SPEED else {
+            y = if (y > 0) y - speed else {
                 outputEdgePointState.value = this.copy(y = dataSource.getFieldHeight())
                 teleport(
-                    dataSource.getFieldHeight() - SNAKE_SPEED,
+                    dataSource.getFieldHeight() - speed,
                     edgePointState,
                 )
             }
@@ -146,13 +156,14 @@ class MoveSnakeUseCase @Inject constructor(
 
     private fun SnakePointModel.down(
         edgePointState: MutableStateFlow<SnakePointModel?>,
-        outputEdgePointState: MutableStateFlow<SnakePointModel?>
+        outputEdgePointState: MutableStateFlow<SnakePointModel?>,
+        deviation: Float
     ): SnakePointModel {
         return copy(
-            y = if (y < dataSource.getFieldHeight()) y + SNAKE_SPEED else {
-                outputEdgePointState.value = this.copy(y = 0)
+            y = if (y < dataSource.getFieldHeight()) y + speed else {
+                outputEdgePointState.value = this.copy(y = 0f)
                 teleport(
-                    0 + SNAKE_SPEED,
+                    0 + speed,
                     edgePointState,
                 )
             }
@@ -160,14 +171,13 @@ class MoveSnakeUseCase @Inject constructor(
     }
 
     private fun SnakePointModel.teleport(
-        coordinate: Int,
+        coordinate: Float,
         edgePointState: MutableStateFlow<SnakePointModel?>,
-    ): Int {
+    ): Float {
         edgePointState.value = this
         return coordinate
     }
 
     companion object {
-        const val REMOVE_CORNER_RANGE = SNAKE_SPEED * 2
     }
 }

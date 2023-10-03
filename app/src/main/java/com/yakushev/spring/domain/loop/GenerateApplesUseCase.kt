@@ -16,8 +16,8 @@ class GenerateApplesUseCase @Inject constructor(
             repeat(3) {
                 newList.add(
                     ApplePointModel(
-                        x = (Math.random() * width).toInt(),
-                        y = (Math.random() * height).toInt()
+                        x = (Math.random() * width).toFloat(),
+                        y = (Math.random() * height).toFloat()
                     )
                 )
             }

@@ -9,9 +9,9 @@ import com.yakushev.spring.presentation.game.model.SnakeUiModel
 
 internal fun SnakeModel.toSnakeUiModel(): SnakeUiModel =
     SnakeUiModel(
-        pointList = pointList.map { point -> Offset(point.x.toFloat(), point.y.toFloat()) },
+        pointList = pointList.map { point -> Offset(point.x, point.y) },
         pathList = pointList.getPathList(),
-        width = width.toFloat()
+        width = width
     )
 
 
@@ -22,7 +22,7 @@ private fun List<SnakePointModel>.getPathList(): List<Path> {
         when {
             index == 0 -> {
                 pathList.add(Path().apply { reset() })
-                pathList.last().moveTo(point.x.toFloat(), point.y.toFloat())
+                pathList.last().moveTo(point.x, point.y)
             }
             pathList.last().isEmpty -> {
                 pathList.last().moveTo(point.x.toFloat(), point.y.toFloat())

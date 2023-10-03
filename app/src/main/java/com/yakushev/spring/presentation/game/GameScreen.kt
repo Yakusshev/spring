@@ -1,4 +1,4 @@
-package com.yakushev.spring.presentation.game.compose
+package com.yakushev.spring.presentation.game
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
@@ -30,7 +30,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.GameState
-import com.yakushev.spring.presentation.game.GameViewModel
+import com.yakushev.spring.presentation.game.compose.Menu
+import com.yakushev.spring.presentation.game.compose.NeonApples
+import com.yakushev.spring.presentation.game.compose.Snake
 import com.yakushev.spring.presentation.game.model.SnakeUiModel
 import kotlin.math.abs
 
@@ -40,7 +42,7 @@ fun GameScreen(
     viewModel: GameViewModel = viewModel(factory = viewModelFactory)
 ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        viewModel.onInitScreen(size.width.toInt(), size.height.toInt())
+        viewModel.onInitScreen(size.width, size.height)
     }
 
     Field(viewModel)
@@ -75,7 +77,7 @@ fun Field(viewModel: GameViewModel) {
 
 
 @Composable
-private fun BoxScope.ScoreText(length: Int) {
+private fun BoxScope.ScoreText(length: Float) {
     Text(
         modifier = Modifier
             .align(Alignment.TopStart)

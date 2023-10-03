@@ -24,9 +24,9 @@ class SetDirectionUseCase @Inject constructor(
         gameDataSource.updateSnakeState { snake ->
             if (snake.pointList.size >= 3) {
                 val xDiff = abs(snake.pointList[0].x - snake.pointList[1].x)
-                if (xDiff < snake.width && xDiff != 0) return@updateSnakeState snake
+                if (xDiff < snake.width && xDiff != 0f) return@updateSnakeState snake
                 val yDiff = abs(snake.pointList[0].y - snake.pointList[1].y)
-                if (yDiff < snake.width && yDiff != 0) return@updateSnakeState snake
+                if (yDiff < snake.width && yDiff != 0f) return@updateSnakeState snake
             }
             gameDataSource.setDirection(direction)
             snake.copy(
