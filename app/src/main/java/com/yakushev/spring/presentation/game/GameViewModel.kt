@@ -3,11 +3,11 @@ package com.yakushev.spring.presentation.game
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yakushev.spring.domain.Const
-import com.yakushev.spring.domain.loop.CalculateLengthUseCase
 import com.yakushev.spring.domain.loop.GenerateApplesUseCase
 import com.yakushev.spring.domain.loop.HandleAppleCollisionScenario
 import com.yakushev.spring.domain.loop.HandleSnakeCollisionScenario
 import com.yakushev.spring.domain.loop.MoveSnakeUseCase
+import com.yakushev.spring.domain.loop.UpdateSnakeLengthUseCase
 import com.yakushev.spring.domain.model.ApplePointModel
 import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.GameState
@@ -40,7 +40,7 @@ class GameViewModel @Inject constructor(
     private val generateApplesUseCase: GenerateApplesUseCase,
     private val getAppleListStateUseCase: GetAppleListStateUseCase,
     private val handleAppleCollisionScenario: HandleAppleCollisionScenario,
-    private val calculateLengthUseCase: CalculateLengthUseCase,
+    private val calculateLengthUseCase: UpdateSnakeLengthUseCase,
     private val handleSnakeCollisionScenario: HandleSnakeCollisionScenario,
 ) : ViewModel() {
 

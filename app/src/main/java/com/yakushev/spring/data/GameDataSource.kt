@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.update
 
 class GameDataSource {
 
+    var snakeLength = 0f
+
     private val gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState.Pause)
     private val snakeState: MutableStateFlow<SnakeModel> = MutableStateFlow(SnakeModel.empty)
     private val directionState: MutableStateFlow<DirectionEnum> = MutableStateFlow(Const.DEFAULT_DIRECTION)
@@ -19,8 +21,6 @@ class GameDataSource {
 
     private var fieldHeight = 0f
     private var fieldWidth = 0f
-
-    private var snakeBodySize = 0
 
     fun getGameState(): StateFlow<GameState> = gameState
     fun getSnakeState(): StateFlow<SnakeModel> = snakeState
@@ -40,22 +40,18 @@ class GameDataSource {
     }
 
     fun updateSnakeState(function: (state: SnakeModel) -> SnakeModel) {
-        snakeState.update { state ->
-            function(state)
-        }
+        snakeState.update { state -> function(state) }
     }
 
     fun updateSnakeLength(length: Float) {
         lengthState.update { length }
     }
 
-    fun setDirection(direction: DirectionEnum) {
-        directionState.update { direction }
+    fun updateDirectionState(function: (state: DirectionEnum) -> DirectionEnum) {
+        directionState.update { state -> function(state) }
     }
 
     fun updateAppleListState(function: (state: List<ApplePointModel>) -> List<ApplePointModel>) {
-        appleListState.update { state ->
-            function(state)
-        }
+        appleListState.update { state -> function(state) }
     }
 }

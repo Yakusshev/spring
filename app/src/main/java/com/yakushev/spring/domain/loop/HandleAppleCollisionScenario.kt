@@ -10,7 +10,7 @@ class HandleAppleCollisionScenario @Inject constructor(
     private val dataSource: GameDataSource,
     private val generateApplesUseCase: GenerateApplesUseCase,
     private val getLastPointDirectionUseCase: GetLastPointDirectionUseCase,
-    private val calculateLengthUseCase: CalculateLengthUseCase
+    private val calculateLengthUseCase: UpdateSnakeLengthUseCase
 ) {
     suspend operator fun invoke() {
         val snake = dataSource.getSnakeState().value
