@@ -1,6 +1,6 @@
 package com.yakushev.spring.domain.model
 
-import com.yakushev.spring.utils.print
+import com.yakushev.spring.utils.toText
 
 data class SnakeModel(
     val width: Float,
@@ -8,7 +8,7 @@ data class SnakeModel(
     val pointList: List<SnakePointModel>,
 ) {
     override fun toString(): String {
-        return "width = $width, pointList(size = ${pointList.size}): ${pointList.print()}"
+        return "width = $width, pointList(size = ${pointList.size}): ${pointList.toText()}"
     }
 
     companion object {
