@@ -9,7 +9,6 @@ import javax.inject.Inject
 class HandleAppleCollisionScenario @Inject constructor(
     private val dataSource: GameDataSource,
     private val generateApplesUseCase: GenerateApplesUseCase,
-    private val getLastPointDirectionUseCase: GetLastPointDirectionUseCase,
     private val calculateLengthUseCase: UpdateSnakeLengthUseCase
 ) {
     suspend operator fun invoke() {
@@ -43,10 +42,11 @@ class HandleAppleCollisionScenario @Inject constructor(
     }
 
     private fun SnakePointModel.grow(): SnakePointModel =
-        when (getLastPointDirectionUseCase()) {
+        when (getDirection()) {
             DirectionEnum.UP -> copy(y = y + Const.GROW)
             DirectionEnum.DOWN -> copy(y = y - Const.GROW)
             DirectionEnum.RIGHT -> copy(x = x - Const.GROW)
             DirectionEnum.LEFT -> copy(x = x + Const.GROW)
+            DirectionEnum.STOP -> throw Exception("last point direction can't be STOP")
         }
 }

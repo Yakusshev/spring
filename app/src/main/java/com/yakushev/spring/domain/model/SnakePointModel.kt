@@ -1,6 +1,5 @@
 package com.yakushev.spring.domain.model
 
-import com.yakushev.spring.domain.Const
 import java.text.DecimalFormat
 
 data class SnakePointModel(
@@ -12,8 +11,17 @@ data class SnakePointModel(
 ) {
     override fun toString(): String {
         val dec = DecimalFormat("0000.00")
-        return "x = ${dec.format(x)}, y = ${dec.format(y)}, $direction, $edge"
+        return "(${dec.format(x)}, ${dec.format(y)}); ${getDirection()}; $edge"
     }
+
+    fun getDirection(): DirectionEnum =
+        when {
+            vy < 0 -> DirectionEnum.UP
+            vy > 0 -> DirectionEnum.DOWN
+            vx > 0 -> DirectionEnum.RIGHT
+            vx < 0 -> DirectionEnum.LEFT
+            else -> DirectionEnum.STOP
+        }
 
     companion object {
         val empty = SnakePointModel(

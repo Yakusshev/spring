@@ -6,7 +6,6 @@ import com.yakushev.spring.domain.Const.SNAKE_SPEED
 import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.EdgeEnum
 import com.yakushev.spring.domain.model.SnakePointModel
-import com.yakushev.spring.utils.log
 import com.yakushev.spring.utils.toText
 import javax.inject.Inject
 
@@ -42,22 +41,37 @@ class MoveSnakeUseCase @Inject constructor(
     private fun MutableList<SnakePointModel>.move(
         deviation: Float
     ): MutableList<SnakePointModel> {
-        val head = when (dataSource.getDirectionState().value) {
-            DirectionEnum.UP -> first().up(this, true)
-            DirectionEnum.DOWN -> first().down(this, true)
-            DirectionEnum.RIGHT -> first().right(this, true)
-            DirectionEnum.LEFT -> first().left(this, true)
-        }
-        this[0] = head
-
-        val tail = when (this[lastIndex].direction) {
-            DirectionEnum.UP -> last().up(this, false)
-            DirectionEnum.DOWN -> last().down(this, false)
-            DirectionEnum.RIGHT -> last().right(this, false)
-            DirectionEnum.LEFT -> last().left(this, false).log("left tail")
-        }
-        this[lastIndex] = tail
+        this[0] = this[0].move(this, true)
+        this[lastIndex] = this[lastIndex].move(this, false)
         return this
+    }
+
+    private fun SnakePointModel.move(list: MutableList<SnakePointModel>, head: Boolean): SnakePointModel {
+        val width = dataSource.getFieldWidth()
+        val height = dataSource.getFieldHeight()
+        val newX = when {
+            x < 0 -> {
+                if (head) list.addEdgePoints(this, this.copy(x = width))
+                width
+            }
+            x > width -> {
+                if (head) list.addEdgePoints(this, this.copy(x = 0f))
+                0f
+            }
+            else -> x + vx
+        }
+        val newY = when {
+            y < 0 -> {
+                if (head) list.addEdgePoints(this, this.copy(y = height))
+                height
+            }
+            y > height -> {
+                if (head) list.addEdgePoints(this, this.copy(y = 0f))
+                0f
+            }
+            else -> y + vy
+        }
+        return copy(x = newX, y = newY)
     }
 
     private fun MutableList<SnakePointModel>.addEdgePoints(
@@ -70,21 +84,25 @@ class MoveSnakeUseCase @Inject constructor(
     }
 
     private fun MutableList<SnakePointModel>.removeCornerIfNeed(): MutableList<SnakePointModel> {
+        if (size < 2) return this
         val tailPoint = this[lastIndex]
         val preTailPoint = this[lastIndex - 1]//.also { point -> if (point.edge == EdgeEnum.INPUT || point.edge == EdgeEnum.OUTPUT) return this }
 
         val deviation = SNAKE_SPEED / 4
-        val removePoint = when (tailPoint.direction) {
+        val removePoint = when (tailPoint.getDirection()) {
             DirectionEnum.UP -> tailPoint.y <= preTailPoint.y + deviation
             DirectionEnum.DOWN -> tailPoint.y >= preTailPoint.y - deviation
             DirectionEnum.RIGHT -> tailPoint.x >= preTailPoint.x - deviation
             DirectionEnum.LEFT -> tailPoint.x <= preTailPoint.x + deviation
+            DirectionEnum.STOP -> false
         }
+
 
         when {
             removePoint && preTailPoint.edge == EdgeEnum.INPUT -> removeEdgePoints()
             removePoint -> {
-                this[lastIndex] = tailPoint.copy(direction = preTailPoint.direction)
+                Log.d("###", "removeCornerIfNeed: $tailPoint ` $preTailPoint")
+                this[lastIndex] = tailPoint.copy(vx = preTailPoint.vx, vy = preTailPoint.vy)
                 remove(preTailPoint)
             }
         }
@@ -99,60 +117,6 @@ class MoveSnakeUseCase @Inject constructor(
         findLast { point -> point.edge == EdgeEnum.INPUT }?.let { point -> remove(point) }
         Log.d("###", "removeEdgePoints: ${this.toText()}")
         return this
-    }
-
-    private fun SnakePointModel.right(
-        list: MutableList<SnakePointModel>,
-        head: Boolean
-    ): SnakePointModel {
-        return copy(
-            x = if (x < dataSource.getFieldWidth()) x + speed else {
-                if (head) list.addEdgePoints(this, this.copy(x = 0f)).log("right tp head")
-//                else list.removeEdgePoints().log("right tp tail")
-                0 + speed
-            }
-        )
-    }
-
-    private fun SnakePointModel.left(
-        list: MutableList<SnakePointModel>,
-        head: Boolean
-    ): SnakePointModel {
-        return copy(
-            x = if (x > 0) x - speed else {
-                if (head) list.addEdgePoints(this, this.copy(x = dataSource.getFieldWidth())).log("left tp head")
-//                else list.removeEdgePoints().log("left tp tail")
-                log("left tp")
-                dataSource.getFieldWidth() - speed
-            }
-        )
-    }
-
-    // y > 0 && y - speed >= list[list.lastIndex - 1].y
-    private fun SnakePointModel.up(
-        list: MutableList<SnakePointModel>,
-        head: Boolean
-    ): SnakePointModel {
-        return copy(
-            y = if (y > 0) y - speed else {
-                if (head) list.addEdgePoints(this, this.copy(y = dataSource.getFieldHeight())).log("up tp head")
-//                else list.removeEdgePoints().log("up tp tail")
-                dataSource.getFieldHeight() - speed
-            }
-        )
-    }
-
-    private fun SnakePointModel.down(
-        list: MutableList<SnakePointModel>,
-        head: Boolean
-    ): SnakePointModel {
-        return copy(
-            y = if (y < dataSource.getFieldHeight()) y + speed else {
-                if (head) list.addEdgePoints(this, this.copy(y = 0f)).log("down tp head")
-//                else list.removeEdgePoints().log("down tp tail")
-                0 + speed
-            }
-        )
     }
 
     companion object {

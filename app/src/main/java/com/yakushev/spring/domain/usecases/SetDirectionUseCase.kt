@@ -1,8 +1,10 @@
 package com.yakushev.spring.domain.usecases
 
 import com.yakushev.spring.data.GameDataSource
+import com.yakushev.spring.domain.Const
 import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.GameState
+import com.yakushev.spring.domain.model.SnakePointModel
 import com.yakushev.spring.utils.log
 import javax.inject.Inject
 import kotlin.math.abs
@@ -36,7 +38,7 @@ class SetDirectionUseCase @Inject constructor(
                 update = true
                 snake.copy(
                     pointList = snake.pointList.toMutableList().apply {
-                        this[0] = first().copy(direction = direction)
+                        this[0] = first().setDirection(direction)
                         add(1, first()/*.copy(direction = direction)*/)
                     }
                 )
@@ -44,4 +46,13 @@ class SetDirectionUseCase @Inject constructor(
             if (update) direction.log("setDirectionUseCase direction") else oldDirection
         }
     }
+
+    fun SnakePointModel.setDirection(direction: DirectionEnum): SnakePointModel =
+        when (direction) {
+            DirectionEnum.UP -> copy(vy = -Const.SNAKE_SPEED, vx = 0f)
+            DirectionEnum.DOWN -> copy(vy = Const.SNAKE_SPEED, vx = 0f)
+            DirectionEnum.RIGHT -> copy(vy = 0f, vx = Const.SNAKE_SPEED)
+            DirectionEnum.LEFT -> copy(vy = 0f, vx = -Const.SNAKE_SPEED)
+            DirectionEnum.STOP -> throw Exception("impossible to set DirectionEnum.STOP")
+        }
 }
