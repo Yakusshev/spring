@@ -32,8 +32,8 @@ class MoveSnakeUseCase @Inject constructor(
                 pointList = snake.pointList
 //                    .apply { lastPointDirection = getLastPointDirection() }
                     .toMutableList()
-                    .move(deviation)
                     .removeCornerIfNeed()
+                    .move(deviation)
             )
         }
     }
@@ -96,7 +96,6 @@ class MoveSnakeUseCase @Inject constructor(
             DirectionEnum.LEFT -> tailPoint.x <= preTailPoint.x + deviation
             DirectionEnum.STOP -> false
         }
-
 
         when {
             removePoint && preTailPoint.edge == EdgeEnum.INPUT -> removeEdgePoints()
