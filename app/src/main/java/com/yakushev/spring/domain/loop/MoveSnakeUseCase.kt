@@ -8,27 +8,30 @@ import com.yakushev.spring.domain.model.EdgeEnum
 import com.yakushev.spring.domain.model.SnakePointModel
 import com.yakushev.spring.utils.log
 import com.yakushev.spring.utils.toText
-import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 class MoveSnakeUseCase @Inject constructor(
     private val dataSource: GameDataSource,
     private val calculateSnakeLengthUseCase: CalculateSnakeLengthUseCase,
+    private val updateSnakeLengthUseCase: UpdateSnakeLengthUseCase,
 ) {
     private var speed = SNAKE_SPEED
-    private var lastPointDirection: DirectionEnum = DirectionEnum.UP
+//    private var lastPointDirection: DirectionEnum = DirectionEnum.UP
 
     suspend operator fun invoke(deviation: Float) {
-        val inputEdgePointState = MutableStateFlow<SnakePointModel?>(value = null)
-        val outputEdgePointState = MutableStateFlow<SnakePointModel?>(value = null)
-        speed = SNAKE_SPEED //* deviation
+        speed = SNAKE_SPEED * deviation
         Log.d("###", "invoke: speed = $speed")
 
+        updateSnakeLengthUseCase()
+//
+//        val dec = DecimalFormat("0000")
+//        val length = dec.format(calculateSnakeLengthUseCase())
+
         dataSource.updateSnakeState { snake ->
-            Log.d("###", "move: snake = $snake")
+//            Log.d("###", "length = $length. $snake")
             snake.copy(
                 pointList = snake.pointList
-                    .apply { lastPointDirection = getLastPointDirection() }
+//                    .apply { lastPointDirection = getLastPointDirection() }
                     .toMutableList()
                     .move(deviation)
                     .removeCornerIfNeed()
@@ -47,7 +50,7 @@ class MoveSnakeUseCase @Inject constructor(
         }
         this[0] = head
 
-        val tail = when (lastPointDirection) {
+        val tail = when (this[lastIndex].direction) {
             DirectionEnum.UP -> last().up(this, false)
             DirectionEnum.DOWN -> last().down(this, false)
             DirectionEnum.RIGHT -> last().right(this, false)
@@ -70,16 +73,20 @@ class MoveSnakeUseCase @Inject constructor(
         val tailPoint = this[lastIndex]
         val preTailPoint = this[lastIndex - 1]//.also { point -> if (point.edge == EdgeEnum.INPUT || point.edge == EdgeEnum.OUTPUT) return this }
 
-        val removePoint = when (lastPointDirection) {
-            DirectionEnum.UP -> tailPoint.y <= preTailPoint.y
-            DirectionEnum.DOWN -> tailPoint.y >= preTailPoint.y
-            DirectionEnum.RIGHT -> tailPoint.x >= preTailPoint.x
-            DirectionEnum.LEFT -> tailPoint.x <= preTailPoint.x
+        val deviation = SNAKE_SPEED / 4
+        val removePoint = when (tailPoint.direction) {
+            DirectionEnum.UP -> tailPoint.y <= preTailPoint.y + deviation
+            DirectionEnum.DOWN -> tailPoint.y >= preTailPoint.y - deviation
+            DirectionEnum.RIGHT -> tailPoint.x >= preTailPoint.x - deviation
+            DirectionEnum.LEFT -> tailPoint.x <= preTailPoint.x + deviation
         }
 
         when {
             removePoint && preTailPoint.edge == EdgeEnum.INPUT -> removeEdgePoints()
-            removePoint -> remove(tailPoint)
+            removePoint -> {
+                this[lastIndex] = tailPoint.copy(direction = preTailPoint.direction)
+                remove(preTailPoint)
+            }
         }
 
 //        if (removePoint) remove(tailPoint)
@@ -94,17 +101,6 @@ class MoveSnakeUseCase @Inject constructor(
         return this
     }
 
-    private fun List<SnakePointModel>.getLastPointDirection(): DirectionEnum {
-        val tailPoint = this[lastIndex]
-        val preTailPoint = this[lastIndex - 1]
-        return when {
-            preTailPoint.x > tailPoint.x -> DirectionEnum.RIGHT
-            preTailPoint.x < tailPoint.x -> DirectionEnum.LEFT
-            preTailPoint.y > tailPoint.y -> DirectionEnum.DOWN
-            else -> DirectionEnum.UP
-        }
-    }
-
     private fun SnakePointModel.right(
         list: MutableList<SnakePointModel>,
         head: Boolean
@@ -112,7 +108,7 @@ class MoveSnakeUseCase @Inject constructor(
         return copy(
             x = if (x < dataSource.getFieldWidth()) x + speed else {
                 if (head) list.addEdgePoints(this, this.copy(x = 0f)).log("right tp head")
-                else list.removeEdgePoints().log("right tp tail")
+//                else list.removeEdgePoints().log("right tp tail")
                 0 + speed
             }
         )
@@ -125,7 +121,7 @@ class MoveSnakeUseCase @Inject constructor(
         return copy(
             x = if (x > 0) x - speed else {
                 if (head) list.addEdgePoints(this, this.copy(x = dataSource.getFieldWidth())).log("left tp head")
-                else list.removeEdgePoints().log("left tp tail")
+//                else list.removeEdgePoints().log("left tp tail")
                 log("left tp")
                 dataSource.getFieldWidth() - speed
             }
@@ -140,7 +136,7 @@ class MoveSnakeUseCase @Inject constructor(
         return copy(
             y = if (y > 0) y - speed else {
                 if (head) list.addEdgePoints(this, this.copy(y = dataSource.getFieldHeight())).log("up tp head")
-                else list.removeEdgePoints().log("up tp tail")
+//                else list.removeEdgePoints().log("up tp tail")
                 dataSource.getFieldHeight() - speed
             }
         )
@@ -153,20 +149,10 @@ class MoveSnakeUseCase @Inject constructor(
         return copy(
             y = if (y < dataSource.getFieldHeight()) y + speed else {
                 if (head) list.addEdgePoints(this, this.copy(y = 0f)).log("down tp head")
-                else list.removeEdgePoints().log("down tp tail")
+//                else list.removeEdgePoints().log("down tp tail")
                 0 + speed
             }
         )
-    }
-
-    //todo если вызвался телепорт - удалить инпут и аутпут
-    private fun SnakePointModel.teleport(
-        coordinate: Float,
-        edgePointState: MutableStateFlow<SnakePointModel?>,
-        head: Boolean,
-    ): Float {
-        if (head) edgePointState.value = this
-        return coordinate
     }
 
     companion object {

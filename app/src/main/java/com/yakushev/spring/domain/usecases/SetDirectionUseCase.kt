@@ -35,7 +35,10 @@ class SetDirectionUseCase @Inject constructor(
                 }
                 update = true
                 snake.copy(
-                    pointList = snake.pointList.toMutableList().apply { add(1, first()) }
+                    pointList = snake.pointList.toMutableList().apply {
+                        this[0] = first().copy(direction = direction)
+                        add(1, first()/*.copy(direction = direction)*/)
+                    }
                 )
             }
             if (update) direction.log("setDirectionUseCase direction") else oldDirection

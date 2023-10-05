@@ -8,7 +8,7 @@ data class SnakeModel(
     val pointList: List<SnakePointModel>,
 ) {
     override fun toString(): String {
-        return "width = $width, pointList(size = ${pointList.size}): ${pointList.toText()}"
+        return "snake. (size = ${pointList.size}): ${pointList.toText()}"
     }
 
     companion object {

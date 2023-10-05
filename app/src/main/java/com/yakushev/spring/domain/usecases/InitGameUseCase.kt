@@ -37,11 +37,17 @@ class InitGameUseCase @Inject constructor(
 
     private fun defaultPointList(width: Float, height: Float): List<SnakePointModel> =
         listOf(
-            SnakePointModel(x = width / 2, y = height / 2, edge = EdgeEnum.EMPTY),
+            SnakePointModel(
+                x = width / 2,
+                y = height / 2,
+                edge = EdgeEnum.EMPTY,
+                direction = Const.DEFAULT_DIRECTION
+            ),
             SnakePointModel(
                 x = width / 2,
                 y = height / 2 + gameDataSource.snakeLength,
-                edge = EdgeEnum.EMPTY
+                edge = EdgeEnum.EMPTY,
+                direction = Const.DEFAULT_DIRECTION
             )
         )
 
