@@ -21,6 +21,7 @@ class InitGameUseCase @Inject constructor(
 
         val refSize = if (height > width) height else width
 
+        gameDataSource.snakeLength = calculateSnakeHeight(height)
         gameDataSource.updateSnakeState { snake ->
             if (snake.pointList.isEmpty() || reset) {
                 snake.copy(
@@ -36,11 +37,19 @@ class InitGameUseCase @Inject constructor(
 
     private fun defaultPointList(width: Float, height: Float): List<SnakePointModel> =
         listOf(
-            SnakePointModel(x = width / 2, y = height / 2, edge = EdgeEnum.EMPTY),
             SnakePointModel(
                 x = width / 2,
-                y = height / 2 + calculateSnakeHeight(height),
-                edge = EdgeEnum.EMPTY
+                y = height / 2,
+                edge = EdgeEnum.EMPTY,
+                vx = 0f,
+                vy = -Const.SNAKE_SPEED,
+            ),
+            SnakePointModel(
+                x = width / 2,
+                y = height / 2 + gameDataSource.snakeLength,
+                edge = EdgeEnum.EMPTY,
+                vx = 0f,
+                vy = -Const.SNAKE_SPEED,
             )
         )
 

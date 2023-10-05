@@ -4,7 +4,19 @@ enum class DirectionEnum {
     UP,
     DOWN,
     RIGHT,
-    LEFT;
+    LEFT,
+    STOP;
+
+    override fun toString(): String =
+        when (this) {
+            UP -> "U"
+            DOWN -> "D"
+            RIGHT -> "R"
+            LEFT -> "L"
+            STOP -> "S"
+        }
+
+//    fun toString(): String =
 
     fun opposite(): DirectionEnum =
         when (this) {
@@ -12,5 +24,6 @@ enum class DirectionEnum {
             DOWN -> UP
             RIGHT -> LEFT
             LEFT -> RIGHT
+            STOP -> STOP
         }
 }
