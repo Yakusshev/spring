@@ -5,9 +5,9 @@ import java.text.DecimalFormat
 data class SnakePointModel(
     val x: Float,
     val y: Float,
-    val edge: EdgeEnum,
     val vx: Float,
     val vy: Float,
+    val edge: EdgeEnum,
 ) {
     override fun toString(): String {
         val dec = DecimalFormat("0000.00")
@@ -27,9 +27,9 @@ data class SnakePointModel(
         val empty = SnakePointModel(
             x = 0f,
             y = 0f,
-            edge = EdgeEnum.EMPTY,
             vx = 0f,
             vy = 0f,
+            edge = EdgeEnum.EMPTY,
         )
     }
 }

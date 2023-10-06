@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.ExperimentalTime
 
 class GameViewModel @Inject constructor(
     private val initGameUseCase: InitGameUseCase,
@@ -46,6 +45,9 @@ class GameViewModel @Inject constructor(
     private val handleSnakeCollisionScenario: HandleSnakeCollisionScenario,
 ) : ViewModel() {
 
+    private var directionChangeJob: Job? = null
+    private var initGameJob: Job? = null
+
     init {
         observeGameState()
     }
@@ -53,10 +55,12 @@ class GameViewModel @Inject constructor(
     internal fun getGameState(): StateFlow<GameState> = getPlayStateUseCase()
     internal fun getSnakeState(): Flow<SnakeUiModel> = getSnakeStateUseCase()
         .map { snakeModel -> snakeModel.toSnakeUiModel() }
+
     internal fun getSnakeLengthState(): StateFlow<Float> = getSnakeLengthUseCase()
     internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
 
     internal fun onInitScreen(width: Float, height: Float) {
+        if (initGameJob?.isActive == true) return
         viewModelScope.launch {
             initGameUseCase(width, height, reset = false)
         }
@@ -82,6 +86,7 @@ class GameViewModel @Inject constructor(
     }
 
     internal fun onDirectionChanged(direction: DirectionEnum) {
+        if (directionChangeJob?.isActive == true) return
         viewModelScope.launch { setDirectionUseCase(direction = direction) }
     }
 
@@ -94,10 +99,10 @@ class GameViewModel @Inject constructor(
                 if (play == GameState.Play) {
                     jobs.addAll(
                         listOf(
-                            loopJob(true) { deviation -> moveSnakeUseCase(deviation) },
-                            loopJob { handleAppleCollisionScenario() },
-                            loopJob { handleSnakeCollisionScenario() },
-                            loopJob { generateApplesUseCase() }
+                            loopJob(delay = Const.DELAY, print = false) { deviation -> moveSnakeUseCase(deviation) },
+                            loopJob(delay = Const.DELAY / 4f) { handleAppleCollisionScenario() },
+                            loopJob(delay = Const.DELAY / 4f) { handleSnakeCollisionScenario() },
+//                            loopJob { generateApplesUseCase() }
                         )
                     )
                 }
@@ -105,14 +110,14 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun loopJob(
+        delay: Float,
         print: Boolean = false,
         function: suspend (deviation: Float) -> Unit,
-    ): Job = viewModelScope.launch(Dispatchers.IO) {
+    ): Job = viewModelScope.launch(Dispatchers.Default) {
         var previous = System.currentTimeMillis()
         while (true) {
-            while (System.currentTimeMillis() - previous < Const.DELAY) delay(timeMillis = 1)
+            while (System.currentTimeMillis() - previous < delay) delay(timeMillis = 1)
             if (print) Log.d("###", "loopJob: ${System.currentTimeMillis() - previous}")
             val deviation = (System.currentTimeMillis() - previous) / Const.DELAY
             previous = System.currentTimeMillis()
