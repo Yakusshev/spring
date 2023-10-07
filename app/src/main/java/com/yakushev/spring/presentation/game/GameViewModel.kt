@@ -60,8 +60,8 @@ class GameViewModel @Inject constructor(
     internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
 
     internal fun onInitScreen(width: Float, height: Float) {
-        if (initGameJob?.isActive == true) return
-        viewModelScope.launch {
+//        if (initGameJob?.isActive == true) return
+        initGameJob = viewModelScope.launch {
             initGameUseCase(width, height, reset = false)
         }
     }
@@ -86,8 +86,8 @@ class GameViewModel @Inject constructor(
     }
 
     internal fun onDirectionChanged(direction: DirectionEnum) {
-        if (directionChangeJob?.isActive == true) return
-        viewModelScope.launch { setDirectionUseCase(direction = direction) }
+        directionChangeJob?.cancel()
+        directionChangeJob = viewModelScope.launch { setDirectionUseCase(direction = direction) }
     }
 
     private fun observeGameState() {
