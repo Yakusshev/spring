@@ -11,26 +11,14 @@ import javax.inject.Inject
 
 class MoveSnakeUseCase @Inject constructor(
     private val dataSource: GameDataSource,
-    private val calculateSnakeLengthUseCase: CalculateSnakeLengthUseCase,
     private val updateSnakeLengthUseCase: UpdateSnakeLengthUseCase,
 ) {
-    private var speed = SNAKE_SPEED
-//    private var lastPointDirection: DirectionEnum = DirectionEnum.UP
 
     suspend operator fun invoke(deviation: Float) {
-        speed = SNAKE_SPEED * deviation
-        Log.d("###", "invoke: speed = $speed")
-
         updateSnakeLengthUseCase()
-//
-//        val dec = DecimalFormat("0000")
-//        val length = dec.format(calculateSnakeLengthUseCase())
-
         dataSource.updateSnakeState { snake ->
-//            Log.d("###", "length = $length. $snake")
             snake.copy(
                 pointList = snake.pointList
-//                    .apply { lastPointDirection = getLastPointDirection() }
                     .toMutableList()
                     .removeCornerIfNeed()
                     .move(deviation)
@@ -41,12 +29,16 @@ class MoveSnakeUseCase @Inject constructor(
     private fun MutableList<SnakePointModel>.move(
         deviation: Float
     ): MutableList<SnakePointModel> {
-        this[0] = this[0].move(this, true)
-        this[lastIndex] = this[lastIndex].move(this, false)
+        this[0] = this[0].move(this, true, 1f)
+        this[lastIndex] = this[lastIndex].move(this, false, 1f)
         return this
     }
 
-    private fun SnakePointModel.move(list: MutableList<SnakePointModel>, head: Boolean): SnakePointModel {
+    private fun SnakePointModel.move(
+        list: MutableList<SnakePointModel>,
+        head: Boolean,
+        deviation: Float
+    ): SnakePointModel {
         val width = dataSource.getFieldWidth()
         val height = dataSource.getFieldHeight()
         val newX = when {
@@ -58,7 +50,7 @@ class MoveSnakeUseCase @Inject constructor(
                 if (head) list.addEdgePoints(this, this.copy(x = 0f))
                 0f
             }
-            else -> x + vx
+            else -> x + vx * deviation
         }
         val newY = when {
             y < 0 -> {
@@ -69,7 +61,7 @@ class MoveSnakeUseCase @Inject constructor(
                 if (head) list.addEdgePoints(this, this.copy(y = 0f))
                 0f
             }
-            else -> y + vy
+            else -> y + vy * deviation
         }
         return copy(x = newX, y = newY)
     }
@@ -100,13 +92,11 @@ class MoveSnakeUseCase @Inject constructor(
         when {
             removePoint && preTailPoint.edge == EdgeEnum.INPUT -> removeEdgePoints()
             removePoint -> {
-                Log.d("###", "removeCornerIfNeed: $tailPoint ` $preTailPoint")
+                Log.d("###", "removeCornerIfNeed: tail$tailPoint ` preTail$preTailPoint")
                 this[lastIndex] = tailPoint.copy(vx = preTailPoint.vx, vy = preTailPoint.vy)
                 remove(preTailPoint)
             }
         }
-
-//        if (removePoint) remove(tailPoint)
         return this
     }
 

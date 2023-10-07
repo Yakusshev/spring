@@ -1,6 +1,13 @@
 package com.yakushev.spring.presentation.game.compose
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -48,7 +55,9 @@ private fun BoxWithConstraintsScope.PauseButton(viewModel: GameViewModel) {
     val state = viewModel.getGameState().collectAsState().value == GameState.Play
     AnimatedVisibility(
         modifier = Modifier.align(Alignment.TopEnd),
-        visible = state
+        visible = state,
+        enter = fadeIn() + slideInVertically(),
+        exit = fadeOut() + slideOutVertically()
     ) {
         Icon(
             modifier = Modifier
@@ -67,7 +76,9 @@ private fun BoxWithConstraintsScope.PlayButton(viewModel: GameViewModel) {
     val state = viewModel.getGameState().collectAsState().value == GameState.Pause
     AnimatedVisibility(
         modifier = Modifier.align(Alignment.Center),
-        visible = state
+        visible = state,
+        enter = fadeIn(),
+        exit = fadeOut()
     ) {
         Icon(
             modifier = Modifier
@@ -80,12 +91,15 @@ private fun BoxWithConstraintsScope.PlayButton(viewModel: GameViewModel) {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BoxWithConstraintsScope.Potracheno(viewModel: GameViewModel) {
     val state = viewModel.getGameState().collectAsState().value is GameState.Potracheno
     AnimatedVisibility(
         modifier = Modifier.align(Alignment.Center),
-        visible = state
+        visible = state,
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut()
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
@@ -106,8 +120,7 @@ fun BoxWithConstraintsScope.Potracheno(viewModel: GameViewModel) {
 @Composable
 private fun PotrachenoText(text: String) {
     Text(
-        modifier = Modifier
-            .padding(0.dp),
+        modifier = Modifier.padding(0.dp),
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
         fontWeight = FontWeight(1000),

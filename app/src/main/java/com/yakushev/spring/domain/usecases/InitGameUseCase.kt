@@ -40,16 +40,16 @@ class InitGameUseCase @Inject constructor(
             SnakePointModel(
                 x = width / 2,
                 y = height / 2,
-                edge = EdgeEnum.EMPTY,
                 vx = 0f,
                 vy = -Const.SNAKE_SPEED,
+                edge = EdgeEnum.EMPTY,
             ),
             SnakePointModel(
                 x = width / 2,
                 y = height / 2 + gameDataSource.snakeLength,
-                edge = EdgeEnum.EMPTY,
                 vx = 0f,
                 vy = -Const.SNAKE_SPEED,
+                edge = EdgeEnum.EMPTY,
             )
         )
 

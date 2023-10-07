@@ -6,48 +6,81 @@ import com.yakushev.spring.domain.model.DirectionEnum
 import com.yakushev.spring.domain.model.GameState
 import com.yakushev.spring.domain.model.SnakePointModel
 import com.yakushev.spring.utils.log
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 import kotlin.math.abs
 
 class SetDirectionUseCase @Inject constructor(
-    private val gameDataSource: GameDataSource
+    private val dataSource: GameDataSource
 ) {
-    operator fun invoke(direction: DirectionEnum, reset: Boolean = false) {
+    suspend operator fun invoke(direction: DirectionEnum, reset: Boolean = false) {
         if (reset) {
-            gameDataSource.updateDirectionState { direction }
+            dataSource.updateDirectionState { direction }
             return
         }
-        if (gameDataSource.getGameState().value != GameState.Play) return
+        if (dataSource.getGameState().value != GameState.Play) return
 
-        gameDataSource.updateDirectionState { oldDirection ->
-            when (oldDirection) {
-                direction -> return@updateDirectionState oldDirection
-                direction.opposite() -> return@updateDirectionState oldDirection
-                else -> {}
-            }
-            var update = false
-            gameDataSource.updateSnakeState { snake ->
-                if (snake.pointList.size >= 3) {
-                    val xDiff = abs(snake.pointList[0].x - snake.pointList[1].x).log("setDirectionUseCase xDiff")
-                    val yDiff = abs(snake.pointList[0].y - snake.pointList[1].y).log("setDirectionUseCase yDiff")
-                    val xNearMiss = xDiff < snake.width && xDiff != 0f
-                    val yNearMiss = yDiff < snake.width && yDiff != 0f
-                    val samePoint = yDiff == 0f && xDiff == 0f
-                    if (xNearMiss || yNearMiss || samePoint) return@updateSnakeState snake
-                }
-                update = true
-                snake.copy(
-                    pointList = snake.pointList.toMutableList().apply {
-                        this[0] = first().setDirection(direction)
-                        add(1, first()/*.copy(direction = direction)*/)
-                    }
-                )
-            }
-            if (update) direction.log("setDirectionUseCase direction") else oldDirection
+        when (dataSource.getDirectionState().value) {
+            direction -> return
+            direction.opposite() -> return
+            else -> {}
         }
+
+        val snake = dataSource.getSnakeState().value
+
+        if (snake.pointList.size >= 3) {
+            val xDiff = abs(snake.pointList[0].x - snake.pointList[1].x).log("setDirectionUseCase xDiff")
+            val yDiff = abs(snake.pointList[0].y - snake.pointList[1].y).log("setDirectionUseCase yDiff")
+            val xNearMiss = xDiff < snake.width && xDiff != 0f
+            val yNearMiss = yDiff < snake.width && yDiff != 0f
+            val samePoint = yDiff == 0f && xDiff == 0f
+            if (xNearMiss || yNearMiss || samePoint) return
+        }
+
+
+        val fieldWidth = dataSource.getFieldWidth()
+        val fieldHeight = dataSource.getFieldHeight()
+
+        while (true) {
+            val head = dataSource.getSnakeState().value.pointList.first()
+            if (!checkEdgeX(head, fieldWidth) && !checkEdgeY(head, fieldHeight)) break
+            delay(1)
+        }
+
+        dataSource.updateDirectionState { direction }
+        dataSource.updateSnakeState { snakeModel ->
+            snakeModel.copy(
+                pointList = snakeModel.pointList.toMutableList().apply {
+                    this[0] = first().setDirection(direction)
+                    add(1, first())
+                }
+            )
+        }
+
+        direction.log("setDirectionUseCase direction")
     }
 
-    fun SnakePointModel.setDirection(direction: DirectionEnum): SnakePointModel =
+    private fun checkEdgeY(
+        head: SnakePointModel,
+        fieldHeight: Float
+    ) = head.vy != 0f && (head.y - head.vy * 1.5 <= 0
+            || head.y + head.vy * 1.5 >= fieldHeight
+            || head.y <= 0 || head.y >= fieldHeight
+            || head.y in -head.vy * 1.5..head.vy * 1.5
+            || head.y in fieldHeight - head.vy * 1.5..fieldHeight + head.vy * 1.5)
+
+    private fun checkEdgeX(
+        head: SnakePointModel,
+        fieldWidth: Float
+    ): Boolean =
+        head.vx != 0f && (head.x - head.vx * 1.5 <= 0
+                || head.x + head.vx * 1.5 >= fieldWidth
+                || head.x <= 0f || head.x >= fieldWidth
+                || head.x in -head.vx * 1.5..head.vx * 1.5
+                || head.x in fieldWidth - head.vx..fieldWidth + head.vx)
+
+
+    private fun SnakePointModel.setDirection(direction: DirectionEnum): SnakePointModel =
         when (direction) {
             DirectionEnum.UP -> copy(vy = -Const.SNAKE_SPEED, vx = 0f)
             DirectionEnum.DOWN -> copy(vy = Const.SNAKE_SPEED, vx = 0f)
