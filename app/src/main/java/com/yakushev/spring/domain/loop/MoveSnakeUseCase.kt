@@ -8,6 +8,7 @@ import com.yakushev.spring.domain.model.EdgeEnum
 import com.yakushev.spring.domain.model.SnakePointModel
 import com.yakushev.spring.utils.toText
 import javax.inject.Inject
+import kotlin.math.sqrt
 
 class MoveSnakeUseCase @Inject constructor(
     private val dataSource: GameDataSource,
@@ -30,7 +31,7 @@ class MoveSnakeUseCase @Inject constructor(
     private fun MutableList<SnakePointModel>.move(
         deviation: Float
     ): MutableList<SnakePointModel> {
-        val appleCoef = dataSource.getAppleEatenState().value.toFloat()
+        val appleCoef = sqrt(dataSource.getAppleEatenState().value.toFloat())
         this[0] = this[0].move(list = this, head =  true, appleCoef).first
         val tailPoint = this[lastIndex].move(list = this, head = false, appleCoef)
         if (tailPoint.second) removeEdgePoints()
