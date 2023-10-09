@@ -33,6 +33,7 @@ class InitGameUseCase @Inject constructor(
             }
         }
         gameDataSource.setFieldSize(width, height)
+        if (reset) gameDataSource.updateAndGetAppleEaten { 0 }
     }
 
     private fun defaultPointList(width: Float, height: Float): List<SnakePointModel> =

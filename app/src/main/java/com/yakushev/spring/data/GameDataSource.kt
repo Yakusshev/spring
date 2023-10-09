@@ -8,6 +8,7 @@ import com.yakushev.spring.domain.model.SnakeModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 
 class GameDataSource {
 
@@ -18,6 +19,7 @@ class GameDataSource {
     private val directionState: MutableStateFlow<DirectionEnum> = MutableStateFlow(Const.DEFAULT_DIRECTION)
     private val lengthState: MutableStateFlow<Float> = MutableStateFlow(value = 0f)
     private val appleListState: MutableStateFlow<List<ApplePointModel>> = MutableStateFlow(emptyList())
+    private val appleEatenState = MutableStateFlow(value = 0)
 
     private var fieldHeight = 0f
     private var fieldWidth = 0f
@@ -27,6 +29,7 @@ class GameDataSource {
     fun getSnakeLengthState(): StateFlow<Float> = lengthState
     fun getDirectionState(): StateFlow<DirectionEnum> = directionState
     fun getAppleListState(): StateFlow<List<ApplePointModel>> = appleListState
+    fun getAppleEatenState(): StateFlow<Int> = appleEatenState
     fun getFieldHeight(): Float = fieldHeight
     fun getFieldWidth(): Float = fieldWidth
 
@@ -54,4 +57,7 @@ class GameDataSource {
     fun updateAppleListState(function: (state: List<ApplePointModel>) -> List<ApplePointModel>) {
         appleListState.update { state -> function(state) }
     }
+
+    fun updateAndGetAppleEaten(function: (state: Int) -> Int): Int =
+        appleEatenState.updateAndGet(function)
 }
