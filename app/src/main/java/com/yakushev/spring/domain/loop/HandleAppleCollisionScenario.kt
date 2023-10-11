@@ -9,6 +9,7 @@ import javax.inject.Inject
 class HandleAppleCollisionScenario @Inject constructor(
     private val dataSource: GameDataSource,
     private val generateApplesUseCase: GenerateApplesUseCase,
+    private val updateSnakeLengthUseCase: UpdateSnakeLengthUseCase,
 ) {
     suspend operator fun invoke() {
         val snake = dataSource.getSnakeState().value
@@ -23,6 +24,7 @@ class HandleAppleCollisionScenario @Inject constructor(
             if (xCollision && yCollision) {
                 newApples.remove(apple)
                 grow()
+                updateSnakeLengthUseCase()
             }
         }
         dataSource.updateAppleListState { newApples }
@@ -36,6 +38,7 @@ class HandleAppleCollisionScenario @Inject constructor(
             val tailPoint = snake.pointList.last()
             newList.removeLast()
             newList.add(tailPoint.grow())
+            dataSource.snakeLength += Const.GROW
             snake.copy(pointList = newList)
         }
     }

@@ -8,15 +8,19 @@ import com.yakushev.spring.domain.model.EdgeEnum
 import com.yakushev.spring.domain.model.SnakePointModel
 import com.yakushev.spring.utils.toText
 import javax.inject.Inject
+import kotlin.math.abs
 import kotlin.math.sqrt
 
 class MoveSnakeUseCase @Inject constructor(
     private val dataSource: GameDataSource,
     private val updateSnakeLengthUseCase: UpdateSnakeLengthUseCase,
+    private val calculateSnakeLengthUseCase: CalculateSnakeLengthUseCase,
 ) {
+    private var actualLength: Float = 0f
 
     suspend operator fun invoke(deviation: Float) {
-        updateSnakeLengthUseCase()
+//        updateSnakeLengthUseCase()
+        actualLength = calculateSnakeLengthUseCase()
         dataSource.updateSnakeState { snake ->
             snake.copy(
                 pointList = snake.pointList
@@ -32,16 +36,20 @@ class MoveSnakeUseCase @Inject constructor(
         deviation: Float
     ): MutableList<SnakePointModel> {
         val appleCoef = sqrt(dataSource.getAppleEatenState().value.toFloat())
-        this[0] = this[0].move(list = this, head =  true, appleCoef).first
-        val tailPoint = this[lastIndex].move(list = this, head = false, appleCoef)
+
+        this[0] = this[0].move(list = this, head =  true, appleCoef, deviation).first
+
+        val tailPoint = this[lastIndex].move(list = this, head = false, appleCoef, deviation)
         if (tailPoint.second) removeEdgePoints()
         this[lastIndex] = tailPoint.first
+
         return this
     }
 
     private fun SnakePointModel.move(
         list: MutableList<SnakePointModel>,
         head: Boolean,
+        appleCoef: Float,
         deviation: Float
     ): Pair<SnakePointModel, Boolean> {
         val width = dataSource.getFieldWidth()
@@ -58,7 +66,8 @@ class MoveSnakeUseCase @Inject constructor(
                 else removeEdgePoints = true
                 0f
             }
-            else -> x + vx.pl(deviation)
+            !head -> x + list.getTailSpeed().vx
+            else -> x + vx.pl(appleCoef) * deviation
         }
         val newY = when {
             y < 0 -> {
@@ -71,7 +80,8 @@ class MoveSnakeUseCase @Inject constructor(
                 else removeEdgePoints = true
                 0f
             }
-            else -> y + vy.pl(deviation)
+            !head -> y + list.getTailSpeed().vy
+            else -> y + vy.pl(appleCoef) * deviation
         }
         return copy(x = newX, y = newY) to removeEdgePoints
     }
@@ -81,6 +91,30 @@ class MoveSnakeUseCase @Inject constructor(
             this > 0 -> this + deviation
             this < 0 -> this - deviation
             else -> this
+        }
+
+    private fun List<SnakePointModel>.getTailSpeed(): SnakePointModel {
+        if (this.size < 2) return SnakePointModel.empty
+        val preTail = this[lastIndex - 1]
+        val tail = last()
+
+        if (preTail.edge == EdgeEnum.OUTPUT) return SnakePointModel.empty
+
+        val tailSectorActualLength = abs(tail.x - preTail.x) + abs(tail.y - preTail.y)
+
+        val diff = actualLength - dataSource.snakeLength
+
+        return SnakePointModel.empty.copy(
+            vx = newPointSpeed(tail.vx, diff),
+            vy = newPointSpeed(tail.vy, diff),
+        )
+    }
+
+    private fun newPointSpeed(speed: Float, diff: Float): Float =
+        when {
+            speed < 0 -> -diff
+            speed == 0f -> 0f
+            else -> diff
         }
 
     private fun MutableList<SnakePointModel>.addEdgePoints(
@@ -121,6 +155,12 @@ class MoveSnakeUseCase @Inject constructor(
         Log.d("###", "MoveSnakeUseCase removeEdgePoints: ${this.toText()}")
         return this
     }
+
+    private class MoveResult(
+        val point: SnakePointModel,
+        val add: Boolean,
+        val remove: Boolean,
+    )
 
     companion object {
     }

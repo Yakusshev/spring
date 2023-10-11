@@ -8,21 +8,13 @@ import kotlin.math.abs
 class CalculateSnakeLengthUseCase @Inject constructor(
     private val dataSource: GameDataSource,
 ) {
-    suspend operator fun invoke(): Float? {
+    suspend operator fun invoke(): Float {
         val list = dataSource.getSnakeState().value.pointList.toList()
-        try {
-            var length = 0f
-            list.forEachIndexed { index, point ->
-                if (point.edge == EdgeEnum.OUTPUT) return@forEachIndexed
-                length += abs(point.x - list[index + 1].x) + abs(point.y - list[index + 1].y)
-                if (index == list.lastIndex - 1) {
-                    return length
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
+        var length = 0f
+        list.forEachIndexed { index, point ->
+            if (point.edge == EdgeEnum.OUTPUT || index >= list.lastIndex) return@forEachIndexed
+            length += abs(point.x - list[index + 1].x) + abs(point.y - list[index + 1].y)
         }
-        return null
+        return length
     }
 }
