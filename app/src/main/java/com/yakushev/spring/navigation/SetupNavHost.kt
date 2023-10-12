@@ -5,25 +5,26 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.yakushev.spring.presentation.game.GameScreen
+import androidx.navigation.compose.dialog
+import com.yakushev.spring.feature.game.presentation.GameScreen
+import com.yakushev.spring.feature.test.presentation.TestScreen
 
 @Composable
 fun SetupNavHost(
     navController: NavHostController,
     viewModelFactory: ViewModelProvider.Factory,
-    exitClick: () -> Unit
 ) {
     NavHost(
         navController = navController,
         startDestination = Route.GAME
     ) {
-        composable(route = Route.SPLASH) {
-
+        dialog(route = Route.SETTINGS) {
+            TestScreen(viewModelFactory = viewModelFactory)
         }
-
         composable(route = Route.GAME) {
             GameScreen(
-                viewModelFactory = viewModelFactory
+                viewModelFactory = viewModelFactory,
+                navController = navController
             )
         }
     }

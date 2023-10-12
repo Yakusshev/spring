@@ -13,8 +13,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.yakushev.spring.domain.model.DirectionEnum
-import com.yakushev.spring.presentation.game.GameViewModel
+import com.yakushev.spring.feature.game.domain.model.DirectionEnum
+import com.yakushev.spring.feature.game.presentation.GameViewModel
 
 
 @Composable
