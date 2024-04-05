@@ -12,8 +12,10 @@ import com.yakushev.spring.feature.game.domain.loop.UpdateSnakeLengthUseCase
 import com.yakushev.spring.feature.game.domain.model.ApplePointModel
 import com.yakushev.spring.feature.game.domain.model.DirectionEnum
 import com.yakushev.spring.feature.game.domain.model.GameState
+import com.yakushev.spring.feature.game.domain.usecases.GetAppleEatenStateUseCase
 import com.yakushev.spring.feature.game.domain.usecases.GetAppleListStateUseCase
 import com.yakushev.spring.feature.game.domain.usecases.GetDelayUseCase
+import com.yakushev.spring.feature.game.domain.usecases.GetDisplaySnakeLengthStateUseCase
 import com.yakushev.spring.feature.game.domain.usecases.GetPlayStateUseCase
 import com.yakushev.spring.feature.game.domain.usecases.GetSnakeLengthUseCase
 import com.yakushev.spring.feature.game.domain.usecases.GetSnakeStateUseCase
@@ -45,6 +47,8 @@ class GameViewModel @Inject constructor(
     private val calculateLengthUseCase: UpdateSnakeLengthUseCase,
     private val handleSnakeCollisionScenario: HandleSnakeCollisionScenario,
     private val getDelayUseCase: GetDelayUseCase,
+    private val getDisplaySnakeLengthStateUseCase: GetDisplaySnakeLengthStateUseCase,
+    private val getAppleEatenStateUseCase: GetAppleEatenStateUseCase,
 ) : ViewModel() {
 
     private var directionChangeJob: Job? = null
@@ -60,6 +64,8 @@ class GameViewModel @Inject constructor(
 
     internal fun getSnakeLengthState(): StateFlow<Float> = getSnakeLengthUseCase()
     internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
+    internal fun getDisplaySnakeLengthState(): StateFlow<Boolean> = getDisplaySnakeLengthStateUseCase()
+    internal fun getAppleEatenState(): StateFlow<Int> = getAppleEatenStateUseCase()
 
     internal fun onInitScreen(width: Float, height: Float) {
 //        if (initGameJob?.isActive == true) return

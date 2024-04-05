@@ -4,10 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,6 +44,17 @@ fun TestScreen(
             onValueChange = viewModel::setFps,
             valueRange = TestViewModel.FPS_RANGE,
         )
+        Row {
+            Text(
+                text = "Display snake length",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = TextUnit(16f, TextUnitType.Sp)
+            )
+            Switch(
+                checked = viewModel.getDisplaySnakeLengthState().collectAsState().value,
+                onCheckedChange = viewModel::setDisplaySnakeLength,
+            )
+        }
 //        RangeSlider(value = 0f.rangeTo(100f), onValueChange = {})
     }
 }
@@ -63,4 +77,9 @@ private fun ColumnScope.SettingTitle(text: String, value: String) {
         color = MaterialTheme.colorScheme.onSurface,
         fontSize = TextUnit(16f, TextUnitType.Sp)
     )
+}
+
+@Composable
+private fun RowScope.SettingTitle(text: String, value: String) {
+
 }
