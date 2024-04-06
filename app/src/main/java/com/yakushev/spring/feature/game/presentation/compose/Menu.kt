@@ -43,7 +43,7 @@ import com.yakushev.spring.navigation.Route
 private val iconSize = 48.dp
 
 @Composable
-fun Menu(viewModel: GameViewModel, navController: NavController) {
+internal fun Menu(viewModel: GameViewModel, navController: NavController) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -123,7 +123,7 @@ private fun BoxWithConstraintsScope.PlayButton(viewModel: GameViewModel) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BoxWithConstraintsScope.Potracheno(viewModel: GameViewModel) {
+internal fun BoxWithConstraintsScope.Potracheno(viewModel: GameViewModel) {
     val state = viewModel.getGameState().collectAsState().value is GameState.Potracheno
     AnimatedVisibility(
         modifier = Modifier.align(Alignment.Center),

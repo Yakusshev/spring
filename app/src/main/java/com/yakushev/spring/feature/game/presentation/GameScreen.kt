@@ -15,11 +15,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PaintingStyle
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,26 +41,34 @@ import androidx.navigation.NavController
 import com.yakushev.spring.feature.game.domain.model.DirectionEnum
 import com.yakushev.spring.feature.game.domain.model.GameState
 import com.yakushev.spring.feature.game.presentation.compose.Menu
-import com.yakushev.spring.feature.game.presentation.compose.NeonApples
-import com.yakushev.spring.feature.game.presentation.compose.Snake
+import com.yakushev.spring.feature.game.presentation.compose.borders
+import com.yakushev.spring.feature.game.presentation.compose.getNeonPaint
+import com.yakushev.spring.feature.game.presentation.compose.getWhitePaint
+import com.yakushev.spring.feature.game.presentation.compose.neonApples
+import com.yakushev.spring.feature.game.presentation.compose.neonSnake
 import com.yakushev.spring.feature.game.presentation.model.SnakeUiModel
 import kotlin.math.abs
 
 @Composable
-fun GameScreen(
+internal fun GameScreen(
     viewModelFactory: ViewModelProvider.Factory,
     navController: NavController,
     viewModel: GameViewModel = viewModel(factory = viewModelFactory),
 ) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        viewModel.onInitScreen(size.width, size.height)
+
+    val config = LocalConfiguration.current
+    LocalDensity.current.run {
+        viewModel.onInitScreen(
+            width = config.screenWidthDp.dp.toPx(),
+            height = config.screenHeightDp.dp.toPx(),
+        )
     }
 
-    Field(viewModel)
+//    Field(viewModel)
 
     val gameState = viewModel.getGameState().collectAsState().value
-    BackHandler(enabled = gameState != GameState.Pause, onBack = viewModel::onBackPressed)
     Menu(viewModel, navController)
+    BackHandler(enabled = gameState != GameState.Pause, onBack = viewModel::onBackPressed)
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_PAUSE -> viewModel.onPauseClicked()
@@ -64,22 +78,40 @@ fun GameScreen(
 }
 
 @Composable
-fun Field(viewModel: GameViewModel) {
+private fun Field(viewModel: GameViewModel) {
     val snake = viewModel.getSnakeState().collectAsState(initial = SnakeUiModel.empty).value
     val apples = viewModel.getAppleListState().collectAsState().value
     val snakeLength = viewModel.getSnakeLengthState().collectAsState().value
     val displaySnakeLength = viewModel.getDisplaySnakeLengthState().collectAsState().value
     val appleEaten = viewModel.getAppleEatenState().collectAsState().value
-    Box(
-        Modifier
+    val borderPath = viewModel.getBordersState().collectAsState(initial = Path()).value
+
+    val width = snake.width
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val applePaint = remember(width) { getNeonPaint(width, 1f, Color.Red) }
+    val appleWhitePaint =  remember(width) { getWhitePaint(width, onSurface, PaintingStyle.Fill) }
+    val borderPaint = remember(width) { getNeonPaint(width, 1f, Color.Blue) }
+    val whitePaint = remember(width) { getWhitePaint(width, onSurface, PaintingStyle.Stroke) }
+    val snakePaint = remember(width) { getNeonPaint(snake.width, 1f, Color.Green) }
+
+    Canvas(
+        modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .pointerInput(Unit) { detectSwipes(viewModel) }
     ) {
-        NeonApples(apples = apples, width = snake.width)
-        Snake(snake)
+        neonApples(apples = apples, width = snake.width, applePaint, appleWhitePaint)
+        neonSnake(snake, snakePaint, whitePaint)
+        borders(borderPath, borderPaint, whitePaint)
+    }
+    Box(Modifier.fillMaxSize()) {
         AppleScoreText(Modifier.align(Alignment.TopStart), appleEaten)
-        if (displaySnakeLength) ScoreText(Modifier.align(Alignment.BottomStart), snakeLength.toString())
+        if (displaySnakeLength) {
+            SnakeLengthText(
+                Modifier.align(Alignment.BottomStart),
+                snakeLength.toString()
+            )
+        }
     }
 }
 
@@ -104,7 +136,7 @@ private fun AppleScoreText(
 }
 
 @Composable
-private fun ScoreText(
+private fun SnakeLengthText(
     modifier: Modifier,
     length: String
 ) {

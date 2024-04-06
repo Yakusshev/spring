@@ -1,9 +1,11 @@
 package com.yakushev.spring.feature.game.presentation
 
 import android.util.Log
+import androidx.compose.ui.graphics.Path
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yakushev.spring.core.Const
+import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.game.domain.loop.GenerateApplesUseCase
 import com.yakushev.spring.feature.game.domain.loop.HandleAppleCollisionScenario
 import com.yakushev.spring.feature.game.domain.loop.HandleSnakeCollisionScenario
@@ -22,6 +24,7 @@ import com.yakushev.spring.feature.game.domain.usecases.GetSnakeStateUseCase
 import com.yakushev.spring.feature.game.domain.usecases.InitGameUseCase
 import com.yakushev.spring.feature.game.domain.usecases.SetDirectionUseCase
 import com.yakushev.spring.feature.game.domain.usecases.SetPlayStateUseCase
+import com.yakushev.spring.feature.game.presentation.mapper.toMultiPath
 import com.yakushev.spring.feature.game.presentation.mapper.toSnakeUiModel
 import com.yakushev.spring.feature.game.presentation.model.SnakeUiModel
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +36,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class GameViewModel @Inject constructor(
+internal class GameViewModel @Inject constructor(
     private val initGameUseCase: InitGameUseCase,
     private val getPlayStateUseCase: GetPlayStateUseCase,
     private val setGameStateUseCase: SetPlayStateUseCase,
@@ -49,6 +52,7 @@ class GameViewModel @Inject constructor(
     private val getDelayUseCase: GetDelayUseCase,
     private val getDisplaySnakeLengthStateUseCase: GetDisplaySnakeLengthStateUseCase,
     private val getAppleEatenStateUseCase: GetAppleEatenStateUseCase,
+    private val gameDataSource: GameDataSource,
 ) : ViewModel() {
 
     private var directionChangeJob: Job? = null
@@ -60,12 +64,13 @@ class GameViewModel @Inject constructor(
 
     internal fun getGameState(): StateFlow<GameState> = getPlayStateUseCase()
     internal fun getSnakeState(): Flow<SnakeUiModel> = getSnakeStateUseCase()
-        .map { snakeModel -> snakeModel.toSnakeUiModel() }
+        .map { snakeModel -> snakeModel?.toSnakeUiModel() ?: SnakeUiModel.empty }
 
     internal fun getSnakeLengthState(): StateFlow<Float> = getSnakeLengthUseCase()
     internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
     internal fun getDisplaySnakeLengthState(): StateFlow<Boolean> = getDisplaySnakeLengthStateUseCase()
     internal fun getAppleEatenState(): StateFlow<Int> = getAppleEatenStateUseCase()
+    fun getBordersState(): Flow<Path> = gameDataSource.getBordersState().map { it.toMultiPath() }
 
     internal fun onInitScreen(width: Float, height: Float) {
 //        if (initGameJob?.isActive == true) return
@@ -108,12 +113,14 @@ class GameViewModel @Inject constructor(
                 if (play == GameState.Play) {
                     jobs.addAll(
                         listOf(
-                            loopJob(delay = delay, print = false) { deviation -> moveSnakeUseCase(deviation) },
+                            loopJob(delay = delay, print = false, moveSnakeUseCase::invoke),
                             loopJob(delay = delay / 4f) { handleAppleCollisionScenario() },
                             loopJob(delay = delay / 4f) { handleSnakeCollisionScenario() },
 //                            loopJob { generateApplesUseCase() }
                         )
                     )
+                } else {
+                    jobs.clear()
                 }
             }
         }

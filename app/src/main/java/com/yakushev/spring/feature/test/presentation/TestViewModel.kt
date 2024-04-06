@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-class TestViewModel @Inject constructor(
+internal class TestViewModel @Inject constructor(
     private val getFpsUseCase: GetFpsUseCase,
     private val setFpsUseCase: SetFpsUseCase,
     private val isDisplaySnakeLengthUseCase: IsDisplaySnakeLengthUseCase,

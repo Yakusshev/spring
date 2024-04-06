@@ -25,7 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun TestScreen(
+internal fun TestScreen(
     viewModelFactory: ViewModelProvider.Factory,
     viewModel: TestViewModel = viewModel(factory = viewModelFactory),
 ) {

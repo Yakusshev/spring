@@ -4,7 +4,7 @@ import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.game.domain.model.GameState
 import javax.inject.Inject
 
-class SetPlayStateUseCase @Inject constructor(
+internal class SetPlayStateUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
     suspend operator fun invoke(play: GameState) {

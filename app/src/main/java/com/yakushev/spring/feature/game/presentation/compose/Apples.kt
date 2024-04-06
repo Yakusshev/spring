@@ -4,37 +4,34 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PaintingStyle
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import com.yakushev.spring.feature.game.domain.model.ApplePointModel
 
-@Composable
-fun NeonApples(apples: List<ApplePointModel>, width: Float) {
-    val appleColor = Color.Red
-    val onSurface = MaterialTheme.colorScheme.onSurface
-    val neonPaint = remember(width) { getNeonPaint(width, 1f, appleColor) }
-    val whitePaint =  remember(width) { getWhitePaint(width, onSurface, PaintingStyle.Fill) }
-    Canvas(modifier = Modifier.fillMaxSize()) {
+fun DrawScope.neonApples(
+    apples: List<ApplePointModel>,
+    width: Float,
+    neonPaint: Paint,
+    whitePaint: Paint,
+) {
+    drawIntoCanvas { canvas ->
         apples.forEach { apple ->
-            drawIntoCanvas { canvas ->
-                canvas.drawCircle(
-                    center = Offset(apple.x, apple.y),
-                    radius = width / 3f,
-                    paint = neonPaint
-                )
-                canvas.drawCircle(
-                    center = Offset(apple.x, apple.y),
-                    radius = width / 3f,
-                    paint = whitePaint
-                )
-            }
+            canvas.drawCircle(
+                center = Offset(apple.x, apple.y),
+                radius = width / 3f,
+                paint = neonPaint
+            )
+            canvas.drawCircle(
+                center = Offset(apple.x, apple.y),
+                radius = width / 3f,
+                paint = whitePaint
+            )
         }
     }
 }

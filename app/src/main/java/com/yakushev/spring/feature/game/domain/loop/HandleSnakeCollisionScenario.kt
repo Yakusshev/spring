@@ -6,11 +6,14 @@ import com.yakushev.spring.feature.game.domain.model.EdgeEnum
 import com.yakushev.spring.feature.game.domain.model.GameState
 import javax.inject.Inject
 
-class HandleSnakeCollisionScenario @Inject constructor(
+internal class HandleSnakeCollisionScenario @Inject constructor(
     private val dataSource: GameDataSource,
 ) {
     suspend operator fun invoke() {
-        val snake = dataSource.getSnakeState().value
+        val snake = dataSource.getSnakeState().value ?: run {
+            Log.d(this::class.simpleName, "snake is null")
+            return
+        }
         if (snake.pointList.filter { point -> point.edge == EdgeEnum.EMPTY }.size < 4) return
         val radius = snake.width / 2
         val head = snake.pointList.first()

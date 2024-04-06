@@ -1,16 +1,17 @@
 package com.yakushev.spring.feature.game.domain.usecases
 
+import android.util.Log
 import com.yakushev.spring.core.Const
+import com.yakushev.spring.core.log
 import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.game.domain.model.DirectionEnum
 import com.yakushev.spring.feature.game.domain.model.GameState
 import com.yakushev.spring.feature.game.domain.model.SnakePointModel
-import com.yakushev.spring.core.log
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 import kotlin.math.abs
 
-class SetDirectionUseCase @Inject constructor(
+internal class SetDirectionUseCase @Inject constructor(
     private val dataSource: GameDataSource
 ) {
     suspend operator fun invoke(direction: DirectionEnum, reset: Boolean = false) {
@@ -26,11 +27,16 @@ class SetDirectionUseCase @Inject constructor(
             else -> {}
         }
 
-        val snake = dataSource.getSnakeState().value
+        val snake = dataSource.getSnakeState().value ?: run {
+            Log.d(this::class.simpleName, "snake is null")
+            return
+        }
 
         if (snake.pointList.size >= 3) {
-            val xDiff = abs(snake.pointList[0].x - snake.pointList[1].x).log("setDirectionUseCase xDiff")
-            val yDiff = abs(snake.pointList[0].y - snake.pointList[1].y).log("setDirectionUseCase yDiff")
+            val xDiff =
+                abs(snake.pointList[0].x - snake.pointList[1].x).log("setDirectionUseCase xDiff")
+            val yDiff =
+                abs(snake.pointList[0].y - snake.pointList[1].y).log("setDirectionUseCase yDiff")
             val xNearMiss = xDiff < snake.width && xDiff != 0f
             val yNearMiss = yDiff < snake.width && yDiff != 0f
             val samePoint = yDiff == 0f && xDiff == 0f
@@ -42,7 +48,7 @@ class SetDirectionUseCase @Inject constructor(
         val fieldHeight = dataSource.getFieldHeight()
 
         while (true) {
-            val head = dataSource.getSnakeState().value.pointList.first()
+            val head = snake.pointList.first()
             if (!checkEdgeX(head, fieldWidth) && !checkEdgeY(head, fieldHeight)) break
             delay(1)
         }

@@ -5,7 +5,7 @@ import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.game.domain.model.ApplePointModel
 import javax.inject.Inject
 
-class GenerateApplesUseCase @Inject constructor(
+internal class GenerateApplesUseCase @Inject constructor(
     private val dataSource: GameDataSource
 ) {
     operator fun invoke(reset: Boolean = false) {

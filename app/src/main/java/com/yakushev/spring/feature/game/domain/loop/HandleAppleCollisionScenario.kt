@@ -1,18 +1,22 @@
 package com.yakushev.spring.feature.game.domain.loop
 
+import android.util.Log
 import com.yakushev.spring.core.Const
 import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.game.domain.model.DirectionEnum
 import com.yakushev.spring.feature.game.domain.model.SnakePointModel
 import javax.inject.Inject
 
-class HandleAppleCollisionScenario @Inject constructor(
+internal class HandleAppleCollisionScenario @Inject constructor(
     private val dataSource: GameDataSource,
     private val generateApplesUseCase: GenerateApplesUseCase,
     private val updateSnakeLengthUseCase: UpdateSnakeLengthUseCase,
 ) {
-    suspend operator fun invoke() {
-        val snake = dataSource.getSnakeState().value
+    operator fun invoke() {
+        val snake = dataSource.getSnakeState().value ?: run {
+            Log.d(this::class.simpleName, "snake is null")
+            return
+        }
         val apples = dataSource.getAppleListState().value
         val radius = snake.width
 
@@ -31,7 +35,7 @@ class HandleAppleCollisionScenario @Inject constructor(
         if (newApples.isEmpty()) generateApplesUseCase()
     }
 
-    private suspend fun grow() {
+    private fun grow() {
         dataSource.updateAndGetAppleEaten { eaten -> eaten + 1 }
         dataSource.updateSnakeState { snake ->
             val newList = snake.pointList.toMutableList()

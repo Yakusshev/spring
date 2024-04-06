@@ -4,7 +4,6 @@ import com.yakushev.spring.core.toText
 
 data class SnakeModel(
     val width: Float,
-    val length: Float,
     val pointList: List<SnakePointModel>,
 ) {
     override fun toString(): String {
@@ -14,7 +13,6 @@ data class SnakeModel(
     companion object {
         val empty = SnakeModel(
             width = 0f,
-            length = 0f,
             pointList = emptyList()
         )
     }
