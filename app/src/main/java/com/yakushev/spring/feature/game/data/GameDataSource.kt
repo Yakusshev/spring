@@ -20,6 +20,7 @@ class GameDataSource {
     private val lengthState: MutableStateFlow<Float> = MutableStateFlow(value = 0f)
     private val appleListState: MutableStateFlow<List<ApplePointModel>> = MutableStateFlow(emptyList())
     private val appleEatenState = MutableStateFlow(value = 0)
+    private val displaySnakeLengthState = MutableStateFlow(value = false)
 
     private var fieldHeight = 0f
     private var fieldWidth = 0f
@@ -30,6 +31,7 @@ class GameDataSource {
     fun getDirectionState(): StateFlow<DirectionEnum> = directionState
     fun getAppleListState(): StateFlow<List<ApplePointModel>> = appleListState
     fun getAppleEatenState(): StateFlow<Int> = appleEatenState
+    fun getDisplaySnakeLengthState(): StateFlow<Boolean> = displaySnakeLengthState
     fun getFieldHeight(): Float = fieldHeight
     fun getFieldWidth(): Float = fieldWidth
 
@@ -60,4 +62,8 @@ class GameDataSource {
 
     fun updateAndGetAppleEaten(function: (state: Int) -> Int): Int =
         appleEatenState.updateAndGet(function)
+
+    fun updateDisplaySnakeLength(display: Boolean) {
+        displaySnakeLengthState.update { display }
+    }
 }

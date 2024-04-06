@@ -13,4 +13,10 @@ class PrivateDataSource(
     fun getFloat(key: String, defaultValue: Float): Float =
         sp.getFloat(key, defaultValue)
 
+    fun putBoolean(key: String, value: Boolean) {
+        sp.edit().putBoolean(key, value).apply()
+    }
+
+    fun getBoolean(key: String, defaultValue: Boolean): Boolean =
+        sp.getBoolean(key, defaultValue)
 }

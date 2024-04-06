@@ -8,8 +8,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
-import com.yakushev.spring.navigation.SetupNavHost
 import com.yakushev.spring.core.theme.SpringTheme
+import com.yakushev.spring.navigation.SetupNavHost
 import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     private fun onInject() {
-        appComponent.inject(activity = this)
+        (applicationContext as SpringApp).getAppComponent().inject(activity = this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +31,6 @@ class MainActivity : ComponentActivity() {
                 SetupNavHost(
                     navController = navController,
                     viewModelFactory = viewModelFactory,
-                    exitClick = ::finishAffinity
                 )
             }
         }

@@ -40,6 +40,8 @@ import com.yakushev.spring.navigation.Route
 
 //TODO A separate library, androidx.compose.material:material-icons-extended, contains the full set of Material icons. Due to the very large size of this library, make sure to use R8/Proguard to strip unused icons if you are including this library as a direct dependency. Alternatively you can make a local copy (by copy and pasting) the icon(s) you wish to keep, or using Android Studio's 'Import vector asset' feature.
 
+private val iconSize = 48.dp
+
 @Composable
 fun Menu(viewModel: GameViewModel, navController: NavController) {
     BoxWithConstraints(
@@ -65,8 +67,8 @@ private fun BoxWithConstraintsScope.PauseButton(viewModel: GameViewModel) {
     ) {
         Icon(
             modifier = Modifier
-                .size(96.dp)
-                .padding(16.dp)
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .size(iconSize)
                 .clickable(enabled = state, onClick = viewModel::onPauseClicked),
             imageVector = Icons.Default.Pause,
             contentDescription = "pause",
@@ -89,8 +91,8 @@ private fun BoxWithConstraintsScope.SettingsButton(
     ) {
         Icon(
             modifier = Modifier
-                .size(96.dp)
-                .padding(16.dp)
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .size(iconSize)
                 .clickable(enabled = state) { navController.navigate(Route.SETTINGS) },
             imageVector = Icons.Sharp.Settings,
             contentDescription = "pause",
@@ -132,7 +134,7 @@ fun BoxWithConstraintsScope.Potracheno(viewModel: GameViewModel) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            PotrachenoText(text = "ПОТРАЧЕНО")
+            PotrachenoText(text = "GAME OVER")
             Icon(
                 modifier = Modifier
                     .size(128.dp)
