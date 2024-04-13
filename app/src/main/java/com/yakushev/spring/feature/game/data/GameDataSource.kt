@@ -5,7 +5,7 @@ import com.yakushev.spring.core.Const
 import com.yakushev.spring.feature.game.domain.model.ApplePointModel
 import com.yakushev.spring.feature.game.domain.model.DirectionEnum
 import com.yakushev.spring.feature.game.domain.model.EdgeEnum
-import com.yakushev.spring.feature.game.domain.model.GameState
+import com.yakushev.spring.feature.game.domain.model.GameStage
 import com.yakushev.spring.feature.game.domain.model.Point
 import com.yakushev.spring.feature.game.domain.model.SnakeModel
 import com.yakushev.spring.feature.game.domain.model.SnakePointModel
@@ -18,7 +18,7 @@ internal class GameDataSource {
 
     var snakeLength = 0f
 
-    private val gameState = MutableStateFlow<GameState>(GameState.Pause)
+    private val gameStage = MutableStateFlow<GameStage>(GameStage.Pause)
     private val snakeState = MutableStateFlow<SnakeModel?>(value = null)
     private val directionState = MutableStateFlow(Const.DEFAULT_DIRECTION)
     private val lengthState = MutableStateFlow(value = 0f)
@@ -30,7 +30,7 @@ internal class GameDataSource {
     private var fieldHeight = 0f
     private var fieldWidth = 0f
 
-    fun getGameState(): StateFlow<GameState> = gameState
+    fun getGameState(): StateFlow<GameStage> = gameStage
     fun getSnakeState(): StateFlow<SnakeModel?> = snakeState
     fun getSnakeLengthState(): StateFlow<Float> = lengthState
     fun getDirectionState(): StateFlow<DirectionEnum> = directionState
@@ -56,8 +56,8 @@ internal class GameDataSource {
         return refSize * Const.SNAKE_BODY_COEF
     }
 
-    suspend fun setGameState(play: GameState) {
-        gameState.emit(play)
+    suspend fun setGameState(play: GameStage) {
+        gameStage.emit(play)
     }
 
     fun setSnake(snakeModel: SnakeModel) {

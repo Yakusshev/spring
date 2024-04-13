@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Spring"
         tools:targetApi="31">
+
+        <profileable android:shell="true"/>
+
         <activity
             android:name=".app.MainActivity"
             android:exported="true"

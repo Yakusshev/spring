@@ -16,8 +16,6 @@ enum class DirectionEnum {
             STOP -> "S"
         }
 
-//    fun toString(): String =
-
     fun opposite(): DirectionEnum =
         when (this) {
             UP -> DOWN

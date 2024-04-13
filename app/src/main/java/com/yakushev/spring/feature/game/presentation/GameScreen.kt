@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PaintingStyle
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
@@ -39,14 +38,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.yakushev.spring.feature.game.domain.model.DirectionEnum
-import com.yakushev.spring.feature.game.domain.model.GameState
+import com.yakushev.spring.feature.game.domain.model.GameStage
 import com.yakushev.spring.feature.game.presentation.compose.Menu
 import com.yakushev.spring.feature.game.presentation.compose.borders
 import com.yakushev.spring.feature.game.presentation.compose.getNeonPaint
 import com.yakushev.spring.feature.game.presentation.compose.getWhitePaint
 import com.yakushev.spring.feature.game.presentation.compose.neonApples
 import com.yakushev.spring.feature.game.presentation.compose.neonSnake
-import com.yakushev.spring.feature.game.presentation.model.SnakeUiModel
+import com.yakushev.spring.feature.game.presentation.model.GameUiModel
 import kotlin.math.abs
 
 @Composable
@@ -64,11 +63,14 @@ internal fun GameScreen(
         )
     }
 
-//    Field(viewModel)
+    val gameState = viewModel.getGameUiState().collectAsState().value
+    gameState?.let { GameField(gameState, viewModel::onDirectionChanged) }
 
-    val gameState = viewModel.getGameState().collectAsState().value
+    GameUi(viewModel = viewModel)
+
+    val gameStage = viewModel.getGameStage().collectAsState().value
     Menu(viewModel, navController)
-    BackHandler(enabled = gameState != GameState.Pause, onBack = viewModel::onBackPressed)
+    BackHandler(enabled = gameStage != GameStage.Pause, onBack = viewModel::onBackPressed)
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_PAUSE -> viewModel.onPauseClicked()
@@ -78,32 +80,37 @@ internal fun GameScreen(
 }
 
 @Composable
-private fun Field(viewModel: GameViewModel) {
-    val snake = viewModel.getSnakeState().collectAsState(initial = SnakeUiModel.empty).value
-    val apples = viewModel.getAppleListState().collectAsState().value
-    val snakeLength = viewModel.getSnakeLengthState().collectAsState().value
-    val displaySnakeLength = viewModel.getDisplaySnakeLengthState().collectAsState().value
-    val appleEaten = viewModel.getAppleEatenState().collectAsState().value
-    val borderPath = viewModel.getBordersState().collectAsState(initial = Path()).value
+private fun GameField(
+    gameState: GameUiModel,
+    onDirectionChanged: (direction: DirectionEnum) -> Unit,
+) {
 
-    val width = snake.width
+    val width = gameState.snakeWidth
     val onSurface = MaterialTheme.colorScheme.onSurface
     val applePaint = remember(width) { getNeonPaint(width, 1f, Color.Red) }
     val appleWhitePaint =  remember(width) { getWhitePaint(width, onSurface, PaintingStyle.Fill) }
     val borderPaint = remember(width) { getNeonPaint(width, 1f, Color.Blue) }
     val whitePaint = remember(width) { getWhitePaint(width, onSurface, PaintingStyle.Stroke) }
-    val snakePaint = remember(width) { getNeonPaint(snake.width, 1f, Color.Green) }
+    val snakePaint = remember(width) { getNeonPaint(gameState.snakeWidth, 1f, Color.Green) }
 
     Canvas(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-            .pointerInput(Unit) { detectSwipes(viewModel) }
+            .pointerInput(Unit) { detectSwipes(onDirectionChanged) }
     ) {
-        neonApples(apples = apples, width = snake.width, applePaint, appleWhitePaint)
-        neonSnake(snake, snakePaint, whitePaint)
-        borders(borderPath, borderPaint, whitePaint)
+        neonApples(apples = gameState.appleList, width = gameState.snakeWidth, applePaint, appleWhitePaint)
+        neonSnake(gameState.snakePathList, snakePaint, whitePaint)
+        borders(gameState.borderPathList, borderPaint, whitePaint)
     }
+}
+
+@Composable
+private fun GameUi(viewModel: GameViewModel) {
+    val snakeLength = viewModel.getSnakeLengthState().collectAsState().value
+    val displaySnakeLength = viewModel.getDisplaySnakeLengthState().collectAsState().value
+    val appleEaten = viewModel.getAppleEatenState().collectAsState().value
+
     Box(Modifier.fillMaxSize()) {
         AppleScoreText(Modifier.align(Alignment.TopStart), appleEaten)
         if (displaySnakeLength) {
@@ -166,7 +173,7 @@ fun OnLifecycleEvent(onEvent: (owner: LifecycleOwner, event: Lifecycle.Event) ->
     }
 }
 
-private suspend fun PointerInputScope.detectSwipes(viewModel: GameViewModel) {
+private suspend fun PointerInputScope.detectSwipes(onDirectionChanged: (direction: DirectionEnum) -> Unit) {
     detectDragGestures { _, dragAmount ->
         val (x, y) = dragAmount
         val threshold = 8
@@ -174,11 +181,11 @@ private suspend fun PointerInputScope.detectSwipes(viewModel: GameViewModel) {
         if (abs(x) < threshold && abs(y) < threshold) return@detectDragGestures
         if (abs(x) / abs(y) in range || abs(y) / abs(x) in range) return@detectDragGestures
         if (abs(x) > abs(y)) {
-            if (x > 0) viewModel.onDirectionChanged(DirectionEnum.RIGHT)
-            else viewModel.onDirectionChanged(DirectionEnum.LEFT)
+            if (x > 0) onDirectionChanged(DirectionEnum.RIGHT)
+            else onDirectionChanged(DirectionEnum.LEFT)
         } else {
-            if (y > 0) viewModel.onDirectionChanged(DirectionEnum.DOWN)
-            else viewModel.onDirectionChanged(DirectionEnum.UP)
+            if (y > 0) onDirectionChanged(DirectionEnum.DOWN)
+            else onDirectionChanged(DirectionEnum.UP)
         }
     }
 }

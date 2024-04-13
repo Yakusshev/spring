@@ -5,7 +5,7 @@ import com.yakushev.spring.core.Const
 import com.yakushev.spring.core.log
 import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.game.domain.model.DirectionEnum
-import com.yakushev.spring.feature.game.domain.model.GameState
+import com.yakushev.spring.feature.game.domain.model.GameStage
 import com.yakushev.spring.feature.game.domain.model.SnakePointModel
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -19,7 +19,7 @@ internal class SetDirectionUseCase @Inject constructor(
             dataSource.updateDirectionState { direction }
             return
         }
-        if (dataSource.getGameState().value != GameState.Play) return
+        if (dataSource.getGameState().value != GameStage.Play) return
 
         when (dataSource.getDirectionState().value) {
             direction -> return

@@ -3,7 +3,7 @@ package com.yakushev.spring.feature.game.domain.loop
 import android.util.Log
 import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.game.domain.model.EdgeEnum
-import com.yakushev.spring.feature.game.domain.model.GameState
+import com.yakushev.spring.feature.game.domain.model.GameStage
 import javax.inject.Inject
 
 internal class HandleSnakeCollisionScenario @Inject constructor(
@@ -38,7 +38,7 @@ internal class HandleSnakeCollisionScenario @Inject constructor(
             }
             if (collision) {
                 Log.d("###", "snake collision: $index.$point ` ${index + 1}.$nextPoint")
-                dataSource.setGameState(GameState.Potracheno(length = dataSource.getSnakeLengthState().value.toInt()))
+                dataSource.setGameState(GameStage.Potracheno(length = dataSource.getSnakeLengthState().value.toInt()))
                 return
             }
         }

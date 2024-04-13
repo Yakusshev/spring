@@ -3,20 +3,20 @@ package com.yakushev.spring.feature.game.presentation.compose
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
-import com.yakushev.spring.feature.game.presentation.model.SnakeUiModel
 
 internal fun DrawScope.neonSnake(
-    snake: SnakeUiModel,
+    pathList: List<Path>,
     neonPaint: Paint,
     whitePaint: Paint,
 ) {
     drawIntoCanvas { canvas ->
-        snake.pathList.forEach { currentPath ->
+        pathList.forEach { currentPath ->
             canvas.drawPath(
                 path = currentPath,
                 paint = neonPaint

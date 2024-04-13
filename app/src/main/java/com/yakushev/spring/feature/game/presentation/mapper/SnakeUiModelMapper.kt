@@ -1,6 +1,5 @@
 package com.yakushev.spring.feature.game.presentation.mapper
 
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import com.yakushev.spring.feature.game.domain.model.EdgeEnum
 import com.yakushev.spring.feature.game.domain.model.SnakeModel
@@ -9,13 +8,12 @@ import com.yakushev.spring.feature.game.presentation.model.SnakeUiModel
 
 internal fun SnakeModel.toSnakeUiModel(): SnakeUiModel =
     SnakeUiModel(
-        pointList = pointList.map { point -> Offset(point.x, point.y) },
         pathList = pointList.toPathList(),
         width = width
     )
 
 
-private fun List<SnakePointModel>.toPathList(): List<Path> {
+internal fun List<SnakePointModel>.toPathList(): List<Path> {
     val pathList = mutableListOf<Path>()
 
     forEachIndexed { index, point ->

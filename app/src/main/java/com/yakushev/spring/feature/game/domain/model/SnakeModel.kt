@@ -10,6 +10,8 @@ data class SnakeModel(
         return "snake. (size = ${pointList.size}): ${pointList.toText()}"
     }
 
+    fun safeCopy(): SnakeModel = SnakeModel(width, pointList.toList())
+
     companion object {
         val empty = SnakeModel(
             width = 0f,
