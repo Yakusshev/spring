@@ -3,12 +3,12 @@ package com.yakushev.spring.feature.game.domain.model
 import java.text.DecimalFormat
 
 data class SnakePointModel(
-    val x: Float,
-    val y: Float,
+    override val x: Float,
+    override val y: Float,
     val vx: Float,
     val vy: Float,
     val edge: EdgeEnum,
-) {
+) : Point {
     override fun toString(): String {
         val dec = DecimalFormat("0000.00")
         return "(${dec.format(x)}, ${dec.format(y)}); ${getDirection()}; $edge"
@@ -24,6 +24,7 @@ data class SnakePointModel(
         }
 
     companion object {
+        //TODO delete
         val empty = SnakePointModel(
             x = 0f,
             y = 0f,

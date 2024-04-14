@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.yakushev.spring.feature.game.domain.model.GameState
+import com.yakushev.spring.feature.game.domain.model.GameStage
 import com.yakushev.spring.feature.game.presentation.GameViewModel
 import com.yakushev.spring.navigation.Route
 
@@ -43,7 +43,7 @@ import com.yakushev.spring.navigation.Route
 private val iconSize = 48.dp
 
 @Composable
-fun Menu(viewModel: GameViewModel, navController: NavController) {
+internal fun Menu(viewModel: GameViewModel, navController: NavController) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -58,7 +58,7 @@ fun Menu(viewModel: GameViewModel, navController: NavController) {
 
 @Composable
 private fun BoxWithConstraintsScope.PauseButton(viewModel: GameViewModel) {
-    val state = viewModel.getGameState().collectAsState().value == GameState.Play
+    val state = viewModel.getGameStage().collectAsState().value == GameStage.Play
     AnimatedVisibility(
         modifier = Modifier.align(Alignment.TopEnd),
         visible = state,
@@ -82,7 +82,7 @@ private fun BoxWithConstraintsScope.SettingsButton(
     viewModel: GameViewModel,
     navController: NavController
 ) {
-    val state = viewModel.getGameState().collectAsState().value == GameState.Pause
+    val state = viewModel.getGameStage().collectAsState().value == GameStage.Pause
     AnimatedVisibility(
         modifier = Modifier.align(Alignment.TopEnd),
         visible = state,
@@ -103,7 +103,7 @@ private fun BoxWithConstraintsScope.SettingsButton(
 
 @Composable
 private fun BoxWithConstraintsScope.PlayButton(viewModel: GameViewModel) {
-    val state = viewModel.getGameState().collectAsState().value == GameState.Pause
+    val state = viewModel.getGameStage().collectAsState().value == GameStage.Pause
     AnimatedVisibility(
         modifier = Modifier.align(Alignment.Center),
         visible = state,
@@ -123,8 +123,8 @@ private fun BoxWithConstraintsScope.PlayButton(viewModel: GameViewModel) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BoxWithConstraintsScope.Potracheno(viewModel: GameViewModel) {
-    val state = viewModel.getGameState().collectAsState().value is GameState.Potracheno
+internal fun BoxWithConstraintsScope.Potracheno(viewModel: GameViewModel) {
+    val state = viewModel.getGameStage().collectAsState().value is GameStage.Potracheno
     AnimatedVisibility(
         modifier = Modifier.align(Alignment.Center),
         visible = state,

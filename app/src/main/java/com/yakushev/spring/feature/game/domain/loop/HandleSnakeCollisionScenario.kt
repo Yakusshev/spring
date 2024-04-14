@@ -3,22 +3,24 @@ package com.yakushev.spring.feature.game.domain.loop
 import android.util.Log
 import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.game.domain.model.EdgeEnum
-import com.yakushev.spring.feature.game.domain.model.GameState
+import com.yakushev.spring.feature.game.domain.model.GameStage
 import javax.inject.Inject
 
-class HandleSnakeCollisionScenario @Inject constructor(
+internal class HandleSnakeCollisionScenario @Inject constructor(
     private val dataSource: GameDataSource,
 ) {
     suspend operator fun invoke() {
-        val snake = dataSource.getSnakeState().value
+        val snake = dataSource.getSnakeState().value ?: run {
+            Log.d(this::class.simpleName, "snake is null")
+            return
+        }
         if (snake.pointList.filter { point -> point.edge == EdgeEnum.EMPTY }.size < 4) return
         val radius = snake.width / 2
         val head = snake.pointList.first()
 
         snake.pointList.forEachIndexed { index, point ->
             if (index < 3) return@forEachIndexed
-            if (index == snake.pointList.lastIndex) return
-            val nextPoint = snake.pointList[index + 1]
+            val nextPoint = snake.pointList.getOrNull(index = index + 1) ?: return@forEachIndexed
             if (point.edge == EdgeEnum.OUTPUT && nextPoint.edge == EdgeEnum.INPUT) return@forEachIndexed
             val collision = when {
                 point.x == nextPoint.x -> {
@@ -35,7 +37,7 @@ class HandleSnakeCollisionScenario @Inject constructor(
             }
             if (collision) {
                 Log.d("###", "snake collision: $index.$point ` ${index + 1}.$nextPoint")
-                dataSource.setGameState(GameState.Potracheno(length = dataSource.getSnakeLengthState().value.toInt()))
+                dataSource.setGameState(GameStage.Potracheno(length = dataSource.getDebugSnakeLengthState().value.toInt()))
                 return
             }
         }

@@ -1,13 +1,13 @@
 package com.yakushev.spring.feature.game.domain.usecases
 
 import com.yakushev.spring.feature.game.data.GameDataSource
-import com.yakushev.spring.feature.game.domain.model.GameState
+import com.yakushev.spring.feature.game.domain.model.GameStage
 import javax.inject.Inject
 
-class SetPlayStateUseCase @Inject constructor(
+internal class SetPlayStateUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
-    suspend operator fun invoke(play: GameState) {
+    suspend operator fun invoke(play: GameStage) {
         gameDataSource.setGameState(play)
     }
 }

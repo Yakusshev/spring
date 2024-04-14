@@ -5,9 +5,8 @@ import com.yakushev.spring.feature.game.domain.model.SnakeModel
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-class GetSnakeStateUseCase @Inject constructor(
+internal class GetSnakeStateUseCase @Inject constructor(
     private val dataSource: GameDataSource
 ) {
-    operator fun invoke(): StateFlow<SnakeModel> =
-        dataSource.getSnakeState()
+    operator fun invoke(): StateFlow<SnakeModel?> = dataSource.getSnakeState()
 }

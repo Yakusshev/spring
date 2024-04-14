@@ -3,15 +3,15 @@ package com.yakushev.spring.feature.game.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yakushev.spring.core.Const
+import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.game.domain.loop.GenerateApplesUseCase
 import com.yakushev.spring.feature.game.domain.loop.HandleAppleCollisionScenario
+import com.yakushev.spring.feature.game.domain.loop.HandleBorderCollisionScenario
 import com.yakushev.spring.feature.game.domain.loop.HandleSnakeCollisionScenario
 import com.yakushev.spring.feature.game.domain.loop.MoveSnakeUseCase
 import com.yakushev.spring.feature.game.domain.loop.UpdateSnakeLengthUseCase
-import com.yakushev.spring.feature.game.domain.model.ApplePointModel
 import com.yakushev.spring.feature.game.domain.model.DirectionEnum
-import com.yakushev.spring.feature.game.domain.model.GameState
+import com.yakushev.spring.feature.game.domain.model.GameStage
 import com.yakushev.spring.feature.game.domain.usecases.GetAppleEatenStateUseCase
 import com.yakushev.spring.feature.game.domain.usecases.GetAppleListStateUseCase
 import com.yakushev.spring.feature.game.domain.usecases.GetDelayUseCase
@@ -20,23 +20,30 @@ import com.yakushev.spring.feature.game.domain.usecases.GetPlayStateUseCase
 import com.yakushev.spring.feature.game.domain.usecases.GetSnakeLengthUseCase
 import com.yakushev.spring.feature.game.domain.usecases.GetSnakeStateUseCase
 import com.yakushev.spring.feature.game.domain.usecases.InitGameUseCase
+import com.yakushev.spring.feature.game.domain.usecases.ResetGameScenario
 import com.yakushev.spring.feature.game.domain.usecases.SetDirectionUseCase
 import com.yakushev.spring.feature.game.domain.usecases.SetPlayStateUseCase
+import com.yakushev.spring.feature.game.presentation.mapper.toMultiPath
 import com.yakushev.spring.feature.game.presentation.mapper.toSnakeUiModel
-import com.yakushev.spring.feature.game.presentation.model.SnakeUiModel
+import com.yakushev.spring.feature.game.presentation.model.GameUiModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
-class GameViewModel @Inject constructor(
+@OptIn(ExperimentalTime::class)
+internal class GameViewModel @Inject constructor(
     private val initGameUseCase: InitGameUseCase,
-    private val getPlayStateUseCase: GetPlayStateUseCase,
-    private val setGameStateUseCase: SetPlayStateUseCase,
+    private val getPlayStageUseCase: GetPlayStateUseCase,
+    private val setGameStageUseCase: SetPlayStateUseCase,
     private val moveSnakeUseCase: MoveSnakeUseCase,
     private val getSnakeStateUseCase: GetSnakeStateUseCase,
     private val setDirectionUseCase: SetDirectionUseCase,
@@ -44,12 +51,17 @@ class GameViewModel @Inject constructor(
     private val generateApplesUseCase: GenerateApplesUseCase,
     private val getAppleListStateUseCase: GetAppleListStateUseCase,
     private val handleAppleCollisionScenario: HandleAppleCollisionScenario,
-    private val calculateLengthUseCase: UpdateSnakeLengthUseCase,
+    private val updateSnakeLengthUseCase: UpdateSnakeLengthUseCase,
     private val handleSnakeCollisionScenario: HandleSnakeCollisionScenario,
+    private val handleBorderCollisionScenario: HandleBorderCollisionScenario,
     private val getDelayUseCase: GetDelayUseCase,
     private val getDisplaySnakeLengthStateUseCase: GetDisplaySnakeLengthStateUseCase,
     private val getAppleEatenStateUseCase: GetAppleEatenStateUseCase,
+    private val resetGameScenario: ResetGameScenario,
+    private val gameDataSource: GameDataSource,
 ) : ViewModel() {
+
+    private val gameUiState = MutableStateFlow<GameUiModel?>(value = null)
 
     private var directionChangeJob: Job? = null
     private var initGameJob: Job? = null
@@ -58,39 +70,38 @@ class GameViewModel @Inject constructor(
         observeGameState()
     }
 
-    internal fun getGameState(): StateFlow<GameState> = getPlayStateUseCase()
-    internal fun getSnakeState(): Flow<SnakeUiModel> = getSnakeStateUseCase()
-        .map { snakeModel -> snakeModel.toSnakeUiModel() }
+    fun getGameUiState(): StateFlow<GameUiModel?> = gameUiState
+    fun getGameStage(): StateFlow<GameStage> = getPlayStageUseCase()
+    fun getAppleEatenState(): StateFlow<Int> = getAppleEatenStateUseCase()
+    fun getSnakeLengthState(): StateFlow<Float> = getSnakeLengthUseCase()
+    fun getDisplaySnakeLengthState(): StateFlow<Boolean> = getDisplaySnakeLengthStateUseCase()
 
-    internal fun getSnakeLengthState(): StateFlow<Float> = getSnakeLengthUseCase()
-    internal fun getAppleListState(): StateFlow<List<ApplePointModel>> = getAppleListStateUseCase()
-    internal fun getDisplaySnakeLengthState(): StateFlow<Boolean> = getDisplaySnakeLengthStateUseCase()
-    internal fun getAppleEatenState(): StateFlow<Int> = getAppleEatenStateUseCase()
-
-    internal fun onInitScreen(width: Float, height: Float) {
-//        if (initGameJob?.isActive == true) return
+    fun onInitScreen(width: Float, height: Float) {
+        val initGame = initGameJob == null
         initGameJob = viewModelScope.launch {
-            initGameUseCase(width, height, reset = false)
+            gameDataSource.setFieldSize(width, height)
+            if (initGame) initGameUseCase()
+            updateGameState()
         }
     }
 
     internal fun onPlayClicked() {
         viewModelScope.launch {
-            setGameStateUseCase(play = GameState.Play)
-            calculateLengthUseCase()
+            setGameStageUseCase(play = GameStage.Play)
+            updateSnakeLengthUseCase()
         }
     }
 
     internal fun onBackPressed() {
-        when (getGameState().value) {
-            GameState.Pause -> {}
-            GameState.Play -> onPauseClicked()
-            is GameState.Potracheno -> resetGame(GameState.Pause)
+        when (getGameStage().value) {
+            GameStage.Pause -> {}
+            GameStage.Play -> onPauseClicked()
+            is GameStage.Potracheno -> resetGame(GameStage.Pause)
         }
     }
 
     internal fun onPauseClicked() {
-        viewModelScope.launch { setGameStateUseCase(play = GameState.Pause) }
+        viewModelScope.launch { setGameStageUseCase(play = GameStage.Pause) }
     }
 
     internal fun onDirectionChanged(direction: DirectionEnum) {
@@ -100,23 +111,43 @@ class GameViewModel @Inject constructor(
 
     private fun observeGameState() {
         viewModelScope.launch {
-            val jobs: MutableList<Job> = mutableListOf()
-            getGameState().collect { play ->
-                val delay = getDelayUseCase()
-                jobs.forEach { job -> job.cancel() }
-                jobs.clear()
-                if (play == GameState.Play) {
-                    jobs.addAll(
-                        listOf(
-                            loopJob(delay = delay, print = false) { deviation -> moveSnakeUseCase(deviation) },
-                            loopJob(delay = delay / 4f) { handleAppleCollisionScenario() },
-                            loopJob(delay = delay / 4f) { handleSnakeCollisionScenario() },
-//                            loopJob { generateApplesUseCase() }
+            val jobList: MutableList<Job> = mutableListOf()
+            getGameStage().collect { gameStage ->
+                val delay = getDelayUseCase().toInt().milliseconds.inWholeNanoseconds
+                jobList.forEach { job -> job.cancel() }
+                jobList.clear()
+                when (gameStage) {
+                    GameStage.Pause -> {}
+                    GameStage.Play -> {
+                        jobList.addAll(
+                            listOf(
+                                loopJob(delay = delay.toFloat(), print = true, moveSnakeUseCase::invoke),
+                                loopJob(delay = delay / 2f) { handleAppleCollisionScenario() },
+                                loopJob(delay = delay / 2f) { handleSnakeCollisionScenario() },
+                                loopJob(delay = delay / 2f) { handleBorderCollisionScenario() },
+                                loopJob(delay = delay.toFloat()) { updateGameState() }
+                            )
                         )
-                    )
+                    }
+                    is GameStage.Potracheno -> {}
                 }
             }
         }
+    }
+
+    private suspend fun updateGameState() {
+        val snake = getSnakeStateUseCase().value?.toSnakeUiModel() ?: run {
+            Log.d("###", "${this::class.simpleName} updateGameState: snake is null")
+            return
+        }
+        gameUiState.emit(
+            value = GameUiModel(
+                snakePathList = snake.pathList,
+                snakeWidth = snake.width,
+                appleList = getAppleListStateUseCase().value,
+                borderPathList = listOf(gameDataSource.getBordersState().value.toMultiPath()),
+            )
+        )
     }
 
     private fun loopJob(
@@ -124,27 +155,39 @@ class GameViewModel @Inject constructor(
         print: Boolean = false,
         function: suspend (deviation: Float) -> Unit,
     ): Job = viewModelScope.launch(Dispatchers.Default) {
-        var previous = System.currentTimeMillis()
+        var lastSec = System.nanoTime()
+        var previous = delay.toLong() + 1
+        var total = 0L
+        var count = 0
         while (true) {
-            while (System.currentTimeMillis() - previous < delay) delay(timeMillis = 1)
-            if (print) Log.d("###", "loopJob: ${System.currentTimeMillis() - previous}")
-            val deviation = (System.currentTimeMillis() - previous) / delay
-            previous = System.currentTimeMillis()
-            function(deviation)
+            previous = measureTime {
+                if (System.nanoTime() - lastSec >= 1.seconds.inWholeNanoseconds && print) {
+                    Log.d("###", "${this::class.simpleName} average calculation time = ${total / 1000000f / count} ms")
+                    lastSec = System.nanoTime()
+                    total = 0
+                    count = 0
+                }
+                if (previous < delay) {
+                    delay(timeMillis = (delay - previous).toLong().nanoseconds.inWholeMilliseconds)
+                }
+                //if (print) Log.d("###", "${this::class.simpleName} loopJob calculation duration = ${previous / 1000000f}")
+                val deviation = previous.toFloat() / delay
+                function(deviation)
+            }.inWholeNanoseconds.also { prev ->
+                total += prev
+                count++
+            }
         }
     }
 
     internal fun onResetClicked() {
-        resetGame(GameState.Play)
+        resetGame(GameStage.Play)
     }
 
-    private fun resetGame(gameState: GameState) {
+    private fun resetGame(gameStage: GameStage) {
         viewModelScope.launch {
-            initGameUseCase(reset = true)
-            setDirectionUseCase(direction = Const.DEFAULT_DIRECTION, reset = true)
-            generateApplesUseCase(reset = true)
-            calculateLengthUseCase()
-            setGameStateUseCase(gameState)
+            resetGameScenario()
+            setGameStageUseCase(gameStage)
         }
     }
 }

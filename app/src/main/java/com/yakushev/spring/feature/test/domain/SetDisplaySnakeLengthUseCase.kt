@@ -4,7 +4,7 @@ import com.yakushev.spring.feature.game.data.GameDataSource
 import com.yakushev.spring.feature.test.data.TestRepository
 import javax.inject.Inject
 
-class SetDisplaySnakeLengthUseCase @Inject constructor(
+internal class SetDisplaySnakeLengthUseCase @Inject constructor(
     private val repository: TestRepository,
     private val gameDataSource: GameDataSource
 ) {

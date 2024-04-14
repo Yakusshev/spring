@@ -61,7 +61,7 @@ private fun BoxWithConstraintsScope.Buttons(viewModel: GameViewModel) {
     }
 }
 
-fun Modifier.directionButtonModifier(
+internal fun Modifier.directionButtonModifier(
     viewModel: GameViewModel,
     direction: DirectionEnum
 ): Modifier = this

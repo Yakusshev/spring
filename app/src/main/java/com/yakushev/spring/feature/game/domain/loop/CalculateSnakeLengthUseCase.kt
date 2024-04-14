@@ -5,11 +5,12 @@ import com.yakushev.spring.feature.game.domain.model.EdgeEnum
 import javax.inject.Inject
 import kotlin.math.abs
 
-class CalculateSnakeLengthUseCase @Inject constructor(
+internal class CalculateSnakeLengthUseCase @Inject constructor(
     private val dataSource: GameDataSource,
 ) {
     operator fun invoke(): Float {
-        val list = dataSource.getSnakeState().value.pointList.toList()
+        val snake = dataSource.getSnakeState().value ?: return 0f
+        val list = snake.pointList.toList()
         var length = 0f
         list.forEachIndexed { index, point ->
             if (point.edge == EdgeEnum.OUTPUT || index >= list.lastIndex) return@forEachIndexed

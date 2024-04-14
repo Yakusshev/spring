@@ -11,7 +11,7 @@ import com.yakushev.spring.feature.game.domain.model.SnakePointModel
 import javax.inject.Inject
 import kotlin.math.sqrt
 
-class MoveSnakeUseCase @Inject constructor(
+internal class MoveSnakeUseCase @Inject constructor(
     private val dataSource: GameDataSource,
     private val updateSnakeLengthUseCase: UpdateSnakeLengthUseCase,
     private val calculateSnakeLengthUseCase: CalculateSnakeLengthUseCase,

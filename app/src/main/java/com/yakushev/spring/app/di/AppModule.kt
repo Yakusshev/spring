@@ -17,7 +17,7 @@ import dagger.multibindings.IntoMap
 import javax.inject.Singleton
 
 @Module
-interface AppModule {
+internal interface AppModule {
     @Binds
     fun bindsViewModelFactory(factory: DaggerViewModelFactory): ViewModelProvider.Factory
 
