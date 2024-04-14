@@ -8,5 +8,5 @@ internal class GetSnakeLengthUseCase @Inject constructor(
     private val gameDataSource: GameDataSource
 ) {
     operator fun invoke(): StateFlow<Float> =
-        gameDataSource.getSnakeLengthState()
+        gameDataSource.getDebugSnakeLengthState()
 }

@@ -14,5 +14,4 @@ fun List<List<Point>>.toMultiPath(): Path =
             }
         }
         Log.d("###", "toMultiPath: $this")
-        close()
     }

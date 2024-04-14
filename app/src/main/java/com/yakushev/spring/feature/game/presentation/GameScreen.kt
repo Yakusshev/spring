@@ -89,8 +89,9 @@ private fun GameField(
     val onSurface = MaterialTheme.colorScheme.onSurface
     val applePaint = remember(width) { getNeonPaint(width, 1f, Color.Red) }
     val appleWhitePaint =  remember(width) { getWhitePaint(width, onSurface, PaintingStyle.Fill) }
-    val borderPaint = remember(width) { getNeonPaint(width, 1f, Color.Blue) }
+    val borderPaint = remember(width) { getNeonPaint(width / 2, 1f, Color.Blue) }
     val whitePaint = remember(width) { getWhitePaint(width, onSurface, PaintingStyle.Stroke) }
+    val borderWhitePaint = remember(width) { getWhitePaint(width / 2, onSurface, PaintingStyle.Stroke) }
     val snakePaint = remember(width) { getNeonPaint(gameState.snakeWidth, 1f, Color.Green) }
 
     Canvas(
@@ -99,9 +100,9 @@ private fun GameField(
             .background(MaterialTheme.colorScheme.surface)
             .pointerInput(Unit) { detectSwipes(onDirectionChanged) }
     ) {
+        borders(gameState.borderPathList, borderPaint, borderWhitePaint)
         neonApples(apples = gameState.appleList, width = gameState.snakeWidth, applePaint, appleWhitePaint)
         neonSnake(gameState.snakePathList, snakePaint, whitePaint)
-        borders(gameState.borderPathList, borderPaint, whitePaint)
     }
 }
 

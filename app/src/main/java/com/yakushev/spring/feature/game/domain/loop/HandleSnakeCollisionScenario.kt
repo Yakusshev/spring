@@ -20,8 +20,7 @@ internal class HandleSnakeCollisionScenario @Inject constructor(
 
         snake.pointList.forEachIndexed { index, point ->
             if (index < 3) return@forEachIndexed
-            if (index == snake.pointList.lastIndex) return
-            val nextPoint = snake.pointList[index + 1]
+            val nextPoint = snake.pointList.getOrNull(index = index + 1) ?: return@forEachIndexed
             if (point.edge == EdgeEnum.OUTPUT && nextPoint.edge == EdgeEnum.INPUT) return@forEachIndexed
             val collision = when {
                 point.x == nextPoint.x -> {
@@ -38,7 +37,7 @@ internal class HandleSnakeCollisionScenario @Inject constructor(
             }
             if (collision) {
                 Log.d("###", "snake collision: $index.$point ` ${index + 1}.$nextPoint")
-                dataSource.setGameState(GameStage.Potracheno(length = dataSource.getSnakeLengthState().value.toInt()))
+                dataSource.setGameState(GameStage.Potracheno(length = dataSource.getDebugSnakeLengthState().value.toInt()))
                 return
             }
         }

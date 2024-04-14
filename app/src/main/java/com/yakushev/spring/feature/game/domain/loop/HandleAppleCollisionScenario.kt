@@ -14,11 +14,11 @@ internal class HandleAppleCollisionScenario @Inject constructor(
 ) {
     operator fun invoke() {
         val snake = dataSource.getSnakeState().value ?: run {
-            Log.d(this::class.simpleName, "snake is null")
+            Log.e(this::class.simpleName, "snake is null")
             return
         }
         val apples = dataSource.getAppleListState().value
-        val radius = snake.width
+        val radius = snake.width * Const.APPLE_COLLISION_COEF
 
         val newApples = apples.toMutableList()
 

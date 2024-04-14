@@ -21,7 +21,7 @@ internal class GameDataSource {
     private val gameStage = MutableStateFlow<GameStage>(GameStage.Pause)
     private val snakeState = MutableStateFlow<SnakeModel?>(value = null)
     private val directionState = MutableStateFlow(Const.DEFAULT_DIRECTION)
-    private val lengthState = MutableStateFlow(value = 0f)
+    private val debugSnakeLengthState = MutableStateFlow(value = 0f)
     private val appleListState = MutableStateFlow<List<ApplePointModel>>(emptyList())
     private val appleEatenState = MutableStateFlow(value = 0)
     private val displaySnakeLengthState = MutableStateFlow(value = false)
@@ -32,7 +32,7 @@ internal class GameDataSource {
 
     fun getGameState(): StateFlow<GameStage> = gameStage
     fun getSnakeState(): StateFlow<SnakeModel?> = snakeState
-    fun getSnakeLengthState(): StateFlow<Float> = lengthState
+    fun getDebugSnakeLengthState(): StateFlow<Float> = debugSnakeLengthState
     fun getDirectionState(): StateFlow<DirectionEnum> = directionState
     fun getAppleListState(): StateFlow<List<ApplePointModel>> = appleListState
     fun getAppleEatenState(): StateFlow<Int> = appleEatenState
@@ -44,7 +44,7 @@ internal class GameDataSource {
     fun setFieldSize(width: Float, height: Float) {
         fieldWidth = width
         fieldHeight = height
-        bordersState.value = level1(
+        bordersState.value = level3(
             height = height,
             width = width,
             cellHalfWidth = getPointWidth() / 3,
@@ -69,15 +69,16 @@ internal class GameDataSource {
         function: ((state: SnakeModel) -> SnakeModel),
     ) {
         snakeState.update { state ->
-            state?.let(function) ?: run {
+            if (state == null || initSnake != null) return@update initSnake ?: run {
                 Log.d(this::class.simpleName, "updateSnakeState: snake is null")
-                initSnake
+                null
             }
+            state.let(function)
         }
     }
 
     fun updateSnakeLength(length: Float) {
-        lengthState.update { length }
+        debugSnakeLengthState.update { length }
     }
 
     fun updateDirectionState(function: (state: DirectionEnum) -> DirectionEnum) {

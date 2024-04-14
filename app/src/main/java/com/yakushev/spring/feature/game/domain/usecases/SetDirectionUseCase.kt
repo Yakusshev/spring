@@ -33,10 +33,10 @@ internal class SetDirectionUseCase @Inject constructor(
         }
 
         if (snake.pointList.size >= 3) {
-            val xDiff =
-                abs(snake.pointList[0].x - snake.pointList[1].x).log("setDirectionUseCase xDiff")
-            val yDiff =
-                abs(snake.pointList[0].y - snake.pointList[1].y).log("setDirectionUseCase yDiff")
+            val xDiff = abs(snake.pointList[0].x - snake.pointList[1].x)
+                .log("setDirectionUseCase xDiff")
+            val yDiff = abs(snake.pointList[0].y - snake.pointList[1].y)
+                .log("setDirectionUseCase yDiff")
             val xNearMiss = xDiff < snake.width && xDiff != 0f
             val yNearMiss = yDiff < snake.width && yDiff != 0f
             val samePoint = yDiff == 0f && xDiff == 0f
